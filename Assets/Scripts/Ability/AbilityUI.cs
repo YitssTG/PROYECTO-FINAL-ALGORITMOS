@@ -6,7 +6,7 @@ using System.Collections;
 public class AbilityUI : MonoBehaviour
 {
     [Header("Configuración")]
-    public string abilityKey = "Q";  
+    public AbilityType abilityKey = AbilityType.PrimaryAb;
     public Button upgradeButton;
     public TextMeshProUGUI levelText;
 
@@ -20,6 +20,7 @@ public class AbilityUI : MonoBehaviour
     {
         float timer = 0f;
 
+        // Esperar hasta que el GameManager y la habilidad estén disponibles
         while ((GameManager.Instance == null ||
                 GameManager.Instance.abilitySystem == null ||
                 !GameManager.Instance.abilitySystem.abilities.ContainsKey(abilityKey) ||
@@ -51,7 +52,7 @@ public class AbilityUI : MonoBehaviour
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(OnUpgradeClicked);
 
-        upgradeButton.gameObject.SetActive(false);
+        upgradeButton.gameObject.SetActive(false); // Inicialmente desactivado
         UpdateUI();
     }
 
@@ -65,23 +66,38 @@ public class AbilityUI : MonoBehaviour
     {
         if (abilityRef == null || playerStats == null) return;
 
+        // Determinar si se puede mejorar la habilidad
         bool hasPoints = playerStats.skillPoints > 0;
         bool notMax = abilityRef.Level < abilityRef.MaxLevel;
         bool canUpgrade = hasPoints && notMax;
 
-        if (abilityKey == "R" && playerStats.playerLevel < 5)
+        // La habilidad 'R' solo se puede mejorar si el jugador tiene nivel 5 o más
+        if (abilityKey == AbilityType.Ultimate && playerStats.playerLevel < 5)
+        {
+            Debug.Log("La habilidad Ultimate no se puede mejorar porque el nivel del jugador es menor a 5.");
             canUpgrade = false;
+        }
 
+        // Habilitar el botón de mejora si se puede mejorar
         upgradeButton.gameObject.SetActive(canUpgrade);
 
+        // Actualizar el texto del nivel de la habilidad
         if (levelText != null)
             levelText.text = "Lv " + abilityRef.Level.ToString();
+
+        Debug.Log($"UI Actualizada - Habilidad: {abilityKey}, Nivel: {abilityRef.Level}, Puntos disponibles: {playerStats.skillPoints}");
     }
 
     private void OnUpgradeClicked()
     {
         if (playerStats == null) return;
-        playerStats.SpendSkillPoint(abilityKey);
+
+        // Intentar gastar un punto de habilidad y mejorar la habilidad
+        bool upgraded = playerStats.SpendSkillPoint(abilityKey);
+        if (upgraded)
+        {
+            Debug.Log($"Habilidad {abilityKey} mejorada.");
+        }
         UpdateUI();
     }
 

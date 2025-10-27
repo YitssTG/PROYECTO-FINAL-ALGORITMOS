@@ -16,7 +16,9 @@ public class PlayerController : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         cam = Camera.main;
-        playerStats = GameManager.Instance.playerStats; 
+        playerStats = GameManager.Instance.playerStats;
+
+
     }
 
     void Update()
@@ -27,6 +29,8 @@ public class PlayerController : MonoBehaviour
                 playerStats.AddExperience(50);
         }
     }
+
+
 
     public void OnRightClick(InputAction.CallbackContext context)
     {

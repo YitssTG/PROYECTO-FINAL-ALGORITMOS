@@ -22,10 +22,19 @@ public class EnemySpawner : MonoBehaviour
     public float intervaloEntreGrupos = 20f;
     public float intervaloEntreEnemigos = 0.5f;
 
-    private Queue<GameObject> colaDeSpawn = new Queue<GameObject>();
     private CustomLinkedList<GameObject> enemigosVivos = new CustomLinkedList<GameObject>();
     private bool puedeSpawnear = false;
     private float tiempoSiguienteGrupo = 0f;
+
+    void OnEnable()
+    {
+        EventManager.OnEnemyDefeated += ContarMuerte;
+    }
+
+    void OnDisable()
+    {
+        EventManager.OnEnemyDefeated -= ContarMuerte;
+    }
 
     void Update()
     {
@@ -74,9 +83,7 @@ public class EnemySpawner : MonoBehaviour
                 mov.SetWalkDestination(endPoint.position);
         }
 
-        colaDeSpawn.Enqueue(enemigo);
         enemigosVivos.Add(enemigo);
-
         yield return new WaitForSeconds(intervaloEntreEnemigos);
     }
 
@@ -91,6 +98,11 @@ public class EnemySpawner : MonoBehaviour
     {
         enemigosVivos.Remove(enemigo);
         Debug.Log($"Enemigo eliminado. Quedan: {enemigosVivos.Count}");
+    }
+
+    private void ContarMuerte()
+    {
+        Debug.Log($"Spawner {name} detectó una muerte mediante evento global.");
     }
 
     public void SetActive(bool active)
@@ -123,7 +135,6 @@ public class EnemySpawner : MonoBehaviour
         }
 
         enemigosVivos.Clear();
-        colaDeSpawn.Clear();
         Debug.Log("Todos los enemigos fueron eliminados manualmente (tecla J).");
     }
 }

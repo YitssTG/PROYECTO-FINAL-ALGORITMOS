@@ -2,14 +2,14 @@ using System.Collections.Generic;
 
 public class CustomLinkedList<T>
 {
-    private Node<T> head;
+    private ListNode<T> head;
     private int count;
 
     public int Count => count;
 
     public void Add(T value)
     {
-        Node<T> newNode = new Node<T>(value);
+        ListNode<T> newNode = new ListNode<T>(value);
 
         if (head == null)
         {
@@ -17,12 +17,12 @@ public class CustomLinkedList<T>
         }
         else
         {
-            Node<T> temp = head;
+            ListNode<T> temp = head;
             while (temp.Next != null)
             {
                 temp = temp.Next;
             }
-            temp.Next = newNode;
+            temp.SetNext(newNode);
         }
 
         count++;
@@ -39,14 +39,14 @@ public class CustomLinkedList<T>
             return true;
         }
 
-        Node<T> prev = head;
-        Node<T> curr = head.Next;
+        ListNode<T> prev = head;
+        ListNode<T> curr = head.Next;
 
         while (curr != null)
         {
             if (EqualityComparer<T>.Default.Equals(curr.Value, value))
             {
-                prev.Next = curr.Next;
+                prev.SetNext(curr.Next);
                 count--;
                 return true;
             }
@@ -60,7 +60,7 @@ public class CustomLinkedList<T>
 
     public IEnumerable<T> GetAll()
     {
-        Node<T> temp = head;
+        ListNode<T> temp = head;
         while (temp != null)
         {
             yield return temp.Value;

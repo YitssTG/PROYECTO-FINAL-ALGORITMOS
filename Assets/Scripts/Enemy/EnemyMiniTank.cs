@@ -21,6 +21,12 @@ public class EnemyMiniTank : EnemyBase
             movement.speed = tankSpeed;
         }
     }
+    protected override void Die()
+    {
+        rewardGold = 40;
+        rewardXP = 120;
+        base.Die();
+    }
 
     public override void Attack()
     {

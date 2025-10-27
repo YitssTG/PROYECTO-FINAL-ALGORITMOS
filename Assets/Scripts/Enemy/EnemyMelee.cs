@@ -21,7 +21,12 @@ public class EnemyMelee : EnemyBase
             movement.speed = meleeSpeed;
         }
     }
-
+    protected override void Die()
+    {
+        rewardGold = 15;
+        rewardXP = 60;
+        base.Die(); // Usa la lógica de EnemyBase
+    }
     public override void Attack()
     {
         Debug.Log($"{enemyName} ataca cuerpo a cuerpo con {damage} de daño.");
