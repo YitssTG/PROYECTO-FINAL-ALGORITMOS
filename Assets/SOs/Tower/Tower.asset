@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bbccc2fa06d89e4a9f7d0151e5b7daa, type: 3}
-  m_Name: Ulti Explosiva
+  m_Script: {fileID: 11500000, guid: 22f9bdf24226f644d8e4bb6dac304c9f, type: 3}
+  m_Name: Tower
   m_EditorClassIdentifier: 
-  abilityName: Ulti
-  cooldown: 4.3046713
-  maxLevel: 3
-  locked: 0
+  towerName: 
+  cost: 1
+  damage: 0
+  range: 20
+  towerPrefab: {fileID: 7263089857831832697, guid: f1b8ed14513eb5346afc497bf28477b2, type: 3}

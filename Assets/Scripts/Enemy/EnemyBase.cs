@@ -8,7 +8,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     [Header("Recompensas")]
     public int rewardXP = 50;
-    public int rewardGold = 20;
+    public int rewardGold = 20; // Oro base
 
     [Header("Movimiento y radios")]
     public EnemyMovement movement;
@@ -30,15 +30,15 @@ public abstract class EnemyBase : MonoBehaviour
             Die();
     }
 
-    protected virtual void Die()
+    public virtual void Die()
     {
         Debug.Log($"{enemyName} ha muerto.");
 
         // ⚡ Enviar evento global de muerte
         EventManager.EnemyDefeated();
 
-        // ⚡ Notificar recompensa
-        EventManager.CoinsCollected(rewardGold);
+        // ⚡ Notificar recompensa de oro
+        EventManager.CoinsCollected(rewardGold);  // El oro se pasa según rewardGold
 
         // ⚡ Dar XP al jugador
         GameManager.Instance.playerStats.AddExperience(rewardXP);

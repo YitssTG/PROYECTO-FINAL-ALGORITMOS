@@ -18,11 +18,11 @@ public class BuildSlot : MonoBehaviour
         UpdateColor();
     }
 
-    public void PlaceTower(GameObject towerPrefab)
+    public void PlaceTower(TowerSO towerSO)
     {
-        if (!isOccupied && towerPrefab != null)
+        if (!isOccupied && towerSO != null)
         {
-            currentTower = Instantiate(towerPrefab, transform.position, Quaternion.identity);
+            currentTower = Instantiate(towerSO.towerPrefab, transform.position, Quaternion.identity);
             isOccupied = true;
             UpdateColor();
         }
@@ -38,8 +38,7 @@ public class BuildSlot : MonoBehaviour
     {
         if (!isOccupied && GameManager.Instance.CanBuild())
         {
-            GameObject towerPrefab = GameManager.Instance.GetSelectedTower();
-            PlaceTower(towerPrefab);
+            GameManager.Instance.TryToBuildTower(this);
         }
     }
 }

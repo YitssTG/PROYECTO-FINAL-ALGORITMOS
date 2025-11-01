@@ -96,8 +96,11 @@ public class EnemySpawner : MonoBehaviour
 
     private void OnEnemyDeath(GameObject enemigo)
     {
-        enemigosVivos.Remove(enemigo);
-        Debug.Log($"Enemigo eliminado. Quedan: {enemigosVivos.Count}");
+        if (enemigo != null) // Asegurarse de que el enemigo no haya sido destruido previamente
+        {
+            enemigosVivos.Remove(enemigo);
+            Debug.Log($"Enemigo eliminado. Quedan: {enemigosVivos.Count}");
+        }
     }
 
     private void ContarMuerte()
@@ -128,13 +131,47 @@ public class EnemySpawner : MonoBehaviour
 
     private void EliminarTodos()
     {
+        // Contadores para el oro basado en los tipos de enemigos
+        int totalMeleeGold = 0;
+        int totalRangedGold = 0;
+        int totalMiniTankGold = 0;
+
+        // Contamos los enemigos de cada tipo antes de eliminarlos
         foreach (var enemigo in enemigosVivos.GetAll())
         {
             if (enemigo != null)
+            {
+                EnemyBase enemyBase = enemigo.GetComponent<EnemyBase>();
+
+                if (enemyBase != null)
+                {
+                    // Aseguramos que estamos contando los enemigos de acuerdo a su tipo
+                    if (enemyBase is EnemyMelee)
+                    {
+                        totalMeleeGold += 30; // Oro por enemigo melee
+                    }
+                    else if (enemyBase is EnemyRanged)
+                    {
+                        totalRangedGold += 40; // Oro por enemigo ranged
+                    }
+                    else if (enemyBase is EnemyMiniTank)
+                    {
+                        totalMiniTankGold += 70; // Oro por enemigo miniTank
+                    }
+                }
+
+                // Eliminamos el enemigo de la escena
                 Destroy(enemigo);
+            }
         }
 
+        // Actualizamos el oro en GoldManager
+        GoldManager.Instance.AddGold(totalMeleeGold + totalRangedGold + totalMiniTankGold);
+
+        // Limpiamos la lista de enemigos vivos
         enemigosVivos.Clear();
-        Debug.Log("Todos los enemigos fueron eliminados manualmente (tecla J).");
+
+        // Log para pruebas
+        Debug.Log($"Todos los enemigos fueron eliminados manualmente (tecla J). Oro total agregado: {totalMeleeGold + totalRangedGold + totalMiniTankGold}");
     }
 }

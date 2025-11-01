@@ -21,11 +21,12 @@ public class EnemyRanged : EnemyBase
             movement.speed = rangedSpeed;
         }
     }
-    protected override void Die()
+
+    public override void Die()
     {
-        rewardGold = 25;
+        rewardGold = 40; // Oro para enemigo Ranged
         rewardXP = 80;
-        base.Die();
+        base.Die(); // Llamamos a la lógica común de la base
     }
 
     public override void Attack()

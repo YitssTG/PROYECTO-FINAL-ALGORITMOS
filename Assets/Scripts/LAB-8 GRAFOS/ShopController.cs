@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
 
 public class ShopController : MonoBehaviour
 {
     [Header("Panel de tienda")]
     public GameObject shopPanel;
-    public TMP_Text goldText;
 
     [Header("Referencias de árboles")]
     public ItemGraphUI attackGraph;
@@ -14,22 +12,10 @@ public class ShopController : MonoBehaviour
     public ItemGraphUI speedGraph;
 
     private bool isOpen;
-    private GoldManager goldManager;
 
     void Start()
     {
-        // ✅ Usamos el Singleton, no FindObjectOfType
-        goldManager = GoldManager.Instance;
-
-        if (goldManager != null)
-            goldManager.OnGoldChanged.AddListener(UpdateGold);
-        else
-            Debug.LogError("❌ GoldManager no encontrado en la escena.");
-
         shopPanel.SetActive(false);
-
-        if (goldManager != null)
-            UpdateGold(goldManager.currentGold);
     }
 
     public void OnToggleShop(InputAction.CallbackContext ctx)
@@ -47,11 +33,5 @@ public class ShopController : MonoBehaviour
             if (defenseGraph != null) defenseGraph.ClearSelection();
             if (speedGraph != null) speedGraph.ClearSelection();
         }
-    }
-
-    private void UpdateGold(int gold)
-    {
-        if (goldText != null)
-            goldText.text = $"Oro: {gold}";
     }
 }

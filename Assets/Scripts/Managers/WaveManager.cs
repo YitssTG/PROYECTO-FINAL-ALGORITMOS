@@ -68,10 +68,10 @@ public class WaveManager : MonoBehaviour
 
             SetSpawnersActive(true);
 
-            if (miniJefePrefab != null && DebeAparecerMiniJefe(currentWave))
-            {
-                SpawnMiniJefe();
-            }
+            //if (miniJefePrefab != null && DebeAparecerMiniJefe(currentWave))
+            //{
+            //    SpawnMiniJefe();
+            //}
 
             timer = waveDuration;
             while (timer > 0)
@@ -91,24 +91,24 @@ public class WaveManager : MonoBehaviour
         return (wave - oleadaMiniJefe) % frecuenciaMiniJefe == 0;
     }
 
-    private void SpawnMiniJefe()
-    {
-        Vector3 spawnPos;
+    //private void SpawnMiniJefe()
+    //{
+    //    Vector3 spawnPos;
 
-        if (puntoMiniJefe != null)
-            spawnPos = puntoMiniJefe.position;
-        else if (spawners != null && spawners.Length > 0)
-            spawnPos = spawners[0].transform.position + new Vector3(0, 0, 2);
-        else
-            spawnPos = Vector3.zero;
+    //    if (puntoMiniJefe != null)
+    //        spawnPos = puntoMiniJefe.position;
+    //    else if (spawners != null && spawners.Length > 0)
+    //        spawnPos = spawners[0].transform.position + new Vector3(0, 0, 2);
+    //    else
+    //        spawnPos = Vector3.zero;
 
-        GameObject jefe = Instantiate(miniJefePrefab, spawnPos, Quaternion.identity);
-        Debug.Log($"Mini Jefe generado en oleada {currentWave}");
+    //    GameObject jefe = Instantiate(miniJefePrefab, spawnPos, Quaternion.identity);
+    //    Debug.Log($"Mini Jefe generado en oleada {currentWave}");
 
-        EnemyMovement mov = jefe.GetComponent<EnemyMovement>();
-        if (mov != null && spawners.Length > 0)
-            mov.target = spawners[0].player; 
-    }
+    //    EnemyMovement mov = jefe.GetComponent<EnemyMovement>();
+    //    if (mov != null && spawners.Length > 0)
+    //        mov.target = spawners[0].player; 
+    //}
 
     private void SetSpawnersActive(bool active)
     {

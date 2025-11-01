@@ -5,7 +5,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Torretas disponibles")]
-    public GameObject[] towerPrefabs;
+    public TowerSO[] towerSOList;  // Aquí usas el SO en lugar de GameObjects
     private int selectedTowerIndex = 0;
 
     [Header("Referencias principales")]
@@ -18,6 +18,9 @@ public class GameManager : MonoBehaviour
     public int monedasTotales = 0;
     public int oleadaActual = 1;
     public int incrementoDificultad = 1;
+
+    [Header("Referencias externas")]
+    public GoldManager goldManager; // Referencia al GoldManager
 
     void Awake()
     {
@@ -47,6 +50,9 @@ public class GameManager : MonoBehaviour
 
         if (spawners == null || spawners.Length == 0)
             Debug.LogWarning("⚠️ No hay spawners asignados en GameManager.");
+
+        if (goldManager == null)
+            Debug.LogWarning("⚠️ GoldManager no está asignado en GameManager.");
     }
 
     void OnEnable()
@@ -115,17 +121,32 @@ public class GameManager : MonoBehaviour
     // ──────────────────────────────
     public bool CanBuild()
     {
-        return towerPrefabs != null && towerPrefabs.Length > 0;
+        TowerSO selectedTower = GetSelectedTowerSO();
+        return selectedTower != null && towerSOList.Length > 0 && goldManager.currentGold >= selectedTower.cost;
     }
 
-    public GameObject GetSelectedTower()
+    public TowerSO GetSelectedTowerSO()
     {
-        return towerPrefabs[selectedTowerIndex];
+        return towerSOList[selectedTowerIndex];
     }
 
     public void SelectTower(int index)
     {
-        if (index >= 0 && index < towerPrefabs.Length)
+        if (index >= 0 && index < towerSOList.Length)
             selectedTowerIndex = index;
+    }
+
+    // Método para construir torreta en una casilla
+    public void TryToBuildTower(BuildSlot slot)
+    {
+        TowerSO selectedTower = GetSelectedTowerSO();
+        if (goldManager.SpendGold(selectedTower.cost))
+        {
+            slot.PlaceTower(selectedTower);
+        }
+        else
+        {
+            Debug.Log("No tienes suficiente oro para colocar esta torreta.");
+        }
     }
 }

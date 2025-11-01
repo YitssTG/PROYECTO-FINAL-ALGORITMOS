@@ -21,11 +21,12 @@ public class EnemyMiniTank : EnemyBase
             movement.speed = tankSpeed;
         }
     }
-    protected override void Die()
+
+    public override void Die()
     {
-        rewardGold = 40;
+        rewardGold = 70; // Oro para enemigo MiniTank
         rewardXP = 120;
-        base.Die();
+        base.Die(); // Llamamos a la lógica común de la base
     }
 
     public override void Attack()
