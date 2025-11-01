@@ -729,6 +729,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a3cf362c1114e824b904506bd6422d5e, type: 2}
   - {fileID: 11400000, guid: c12bae0ec6f574046b0afc9e0c71178c, type: 2}
   - {fileID: 11400000, guid: 1166214b0d21e0143bc498f1691b5859, type: 2}
+  - {fileID: 11400000, guid: c782f458945a43f44ab05bacb2a7dbf7, type: 2}
+  - {fileID: 11400000, guid: facef696b9632df4eb4fd3f8c821eb4e, type: 2}
+  - {fileID: 11400000, guid: cc19a75201cb4f342b99aa12e064d92a, type: 2}
+  - {fileID: 11400000, guid: 180805624cca14f4e8e4cd35ba679afa, type: 2}
+  - {fileID: 11400000, guid: f52ccb100235d6246b19eb772ed7bf37, type: 2}
+  - {fileID: 11400000, guid: f486926ee1c48844a9f5df755500af51, type: 2}
   goldManager: {fileID: 1981366285}
   inventory: {fileID: 331521912}
   xSpacing: 200
@@ -4019,6 +4025,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 67d02e80adeb42b4ca2c4da887a2086a, type: 2}
   - {fileID: 11400000, guid: 73f4b00c17fc5e842a33802bcf7de441, type: 2}
   - {fileID: 11400000, guid: da8c5c78d5e8c1349b1bdd57a23d2478, type: 2}
+  - {fileID: 11400000, guid: 3c1b8e67401df3146819b09b27215897, type: 2}
+  - {fileID: 11400000, guid: 74aab311e867492428d9b1ab6d5bf37e, type: 2}
+  - {fileID: 11400000, guid: 9affc74e89f83e641aad00e6fcec850e, type: 2}
+  - {fileID: 11400000, guid: d1e4d6d0d54a52946af82debd7801d62, type: 2}
+  - {fileID: 11400000, guid: c1f10f2c8f3394049b0104482d35b0ba, type: 2}
+  - {fileID: 11400000, guid: 4294362b82e82df45b32c74779aba31b, type: 2}
   goldManager: {fileID: 1981366285}
   inventory: {fileID: 331521912}
   xSpacing: 200
@@ -4932,6 +4944,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d9430a4bd6a4aa74ab25b2c4b921fd0d, type: 2}
   - {fileID: 11400000, guid: 07a7bc0870d87d34abd4660332e97004, type: 2}
   - {fileID: 11400000, guid: 1d89e039a488dea439da7968a0b32260, type: 2}
+  - {fileID: 11400000, guid: 401e390f95cdcf646a3ed93b13573370, type: 2}
+  - {fileID: 11400000, guid: 77f5418ddccdcc54c9b666b5f9079f6b, type: 2}
+  - {fileID: 11400000, guid: 366b36567f79c7048bbe33e4095bfc4b, type: 2}
+  - {fileID: 11400000, guid: d49b199de3cb9c244bb6ab980bade045, type: 2}
+  - {fileID: 11400000, guid: c39e6b4c9b0e4d746bfb2ec7daab2cba, type: 2}
+  - {fileID: 11400000, guid: 30b1dd6ff84da394fae4184e7a0cca4b, type: 2}
   goldManager: {fileID: 1981366285}
   inventory: {fileID: 331521912}
   xSpacing: 200
@@ -6884,6 +6902,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a98f480690d9c546b65db8415aee35f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  abilityDatabase: {fileID: 11400000, guid: 8ca2896d9c7b68448a52606036576ab9, type: 2}
 --- !u!1 &2035923701
 GameObject:
   m_ObjectHideFlags: 0

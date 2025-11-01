@@ -29,6 +29,8 @@ public class ItemGraphUI : MonoBehaviour
     private readonly List<ItemData> purchaseHistory = new();
     private ItemData selectedItem;
 
+    private bool initialized = false;
+
     // 🧩 Aquí conectamos con tus estructuras
     private OrientedGraph<ItemData> graph = new OrientedGraph<ItemData>();
     private Dictionary<ItemData, Node<ItemData>> graphNodes = new();
@@ -37,7 +39,12 @@ public class ItemGraphUI : MonoBehaviour
 
     private void OnEnable()
     {
-        ResetItemsState();
+        if (!initialized)
+        {
+            ResetItemsState(); // Solo la primera vez
+            initialized = true;
+        }
+
         BuildGraph();
         ArrangeTreeLayout();
         UpdateUnlocks();

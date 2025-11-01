@@ -1,73 +1,62 @@
 ﻿using System;
 using UnityEngine;
 
-public class Ability
+[CreateAssetMenu(fileName = "NewAbility", menuName = "Abilities/Ability")]
+public class Ability : ScriptableObject
 {
-    public string Name;
-    public float Cooldown;
-    private float lastCastTime;
-    public int Level { get; private set; }
-    public int MaxLevel;
-    public bool Locked = true; // La habilidad está bloqueada inicialmente
+    [Header("Datos base")]
+    public string abilityName;
+    public float cooldown;
+    public int maxLevel = 5;
+    public bool locked = true; // Bloqueada inicialmente
 
-    public Action OnCast;
+    [NonSerialized] private float lastCastTime;
+    [NonSerialized] public int level = 0;
+    [NonSerialized] public Action OnCast;
 
-    public Ability(string name, float cooldown, int maxLevel = 5)
-    {
-        Name = name;
-        Cooldown = cooldown;
-        lastCastTime = -cooldown;
-        Level = 0;
-        MaxLevel = maxLevel;
-    }
-
-    // Verificar si la habilidad puede lanzarse
     public bool CanCast()
     {
-        return !Locked && Level > 0 && Time.time >= lastCastTime + Cooldown;
+        return !locked && level > 0 && Time.time >= lastCastTime + cooldown;
     }
 
-    // Lanzar la habilidad
     public void Cast()
     {
         if (CanCast())
         {
             lastCastTime = Time.time;
-            Debug.Log($"La habilidad {Name} ha sido lanzada (Nivel {Level})");
+            Debug.Log($"[{abilityName}] lanzada (Nivel {level})");
             OnCast?.Invoke();
-            return;
         }
-
-        if (Locked || Level == 0)
+        else if (locked || level == 0)
         {
-            Debug.Log($"La habilidad {Name} está bloqueada.");
-            return;
-        }
-
-        float remaining = (lastCastTime + Cooldown) - Time.time;
-        Debug.Log($"La habilidad {Name} está en cooldown. Faltan {remaining:F1}s");
-    }
-
-    // Mejorar la habilidad
-    public void Upgrade()
-    {
-        if (Locked)
-        {
-            Locked = false;
-            Level = 1;
-            Debug.Log($"La habilidad {Name} ha sido desbloqueada en el nivel {Level}!");
-            return;
-        }
-
-        if (Level < MaxLevel)
-        {
-            Level++;
-            Cooldown = Mathf.Max(0.5f, Cooldown * 0.9f); // Reducir el cooldown
-            Debug.Log($"La habilidad {Name} ha sido mejorada a nivel {Level}, Cooldown: {Cooldown:F1}s");
+            Debug.Log($"[{abilityName}] está bloqueada.");
         }
         else
         {
-            Debug.Log($"La habilidad {Name} ya está al máximo nivel!");
+            float remaining = (lastCastTime + cooldown) - Time.time;
+            Debug.Log($"[{abilityName}] en cooldown ({remaining:F1}s restantes)");
+        }
+    }
+
+    public void Upgrade()
+    {
+        if (locked)
+        {
+            locked = false;
+            level = 1;
+            Debug.Log($"[{abilityName}] desbloqueada en nivel {level}");
+            return;
+        }
+
+        if (level < maxLevel)
+        {
+            level++;
+            cooldown = Mathf.Max(0.5f, cooldown * 0.9f);
+            Debug.Log($"[{abilityName}] mejorada a nivel {level} (CD: {cooldown:F1}s)");
+        }
+        else
+        {
+            Debug.Log($"[{abilityName}] ya está al nivel máximo.");
         }
     }
 }
