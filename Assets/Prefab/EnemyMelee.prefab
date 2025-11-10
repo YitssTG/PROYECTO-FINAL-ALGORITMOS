@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6853201630049303262}
   - component: {fileID: 4317232581092808194}
   - component: {fileID: -5590238785133456535}
+  - component: {fileID: 8697323886695559603}
   m_Layer: 0
   m_Name: EnemyMelee
   m_TagString: Enemy
@@ -166,7 +167,22 @@ MonoBehaviour:
   enemyName: 
   health: 0
   damage: 0
+  rewardXP: 50
+  rewardGold: 20
   movement: {fileID: 4317232581092808194}
   meleeDetection: 8
   meleeAttack: 1.5
   meleeSpeed: 2
+--- !u!114 &8697323886695559603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3770319924020552060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c93fd50492a97114dbe34c6f7bd6e3ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackCooldown: 1

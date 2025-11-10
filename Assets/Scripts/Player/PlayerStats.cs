@@ -38,6 +38,13 @@ public class PlayerStats : MonoBehaviour
         // Inicializar la salud del jugador
         currentHealth = maxHealth;
         OnHealthChanged.Invoke(currentHealth);  // Notificar a la UI el valor inicial de la vida
+
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.speed = speed;
+            Debug.Log($"[INIT SPEED SET] NavMeshAgent speed seteado a {speed} desde PlayerStats");
+        }
     }
 
     // Métodos para añadir experiencia y subir de nivel
@@ -81,6 +88,12 @@ public class PlayerStats : MonoBehaviour
 
         // Notificar a la UI del cambio en la salud
         OnHealthChanged.Invoke(currentHealth);
+        Debug.Log($"Player recibió {amount} de daño. Vida actual: {currentHealth}");
+        if (currentHealth <= 0)
+        {
+            Debug.Log("PLAYER MURIÓ");
+            Destroy(gameObject);
+        }
     }
 
     // Método para curarse
@@ -121,5 +134,34 @@ public class PlayerStats : MonoBehaviour
         }
 
         return false;
+    }
+    public void ApplyItemStats(ItemData item)
+    {
+        Debug.Log($"[DEBUG ITEM] Data en SO → Damage={item.bonusDamage} Armor={item.bonusArmor} Speed={item.bonusSpeed}");
+
+        damage += item.bonusDamage;
+        armor += item.bonusArmor;
+        speed += item.bonusSpeed;
+
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+            agent.speed = speed;
+
+        Debug.Log($"[MEJORA ITEM] + {item.itemName} aplicado → Damage +{item.bonusDamage} | Armor +{item.bonusArmor} | Speed +{item.bonusSpeed}");
+        Debug.Log($"[STATS ACTUALES] Damage={damage} | Armor={armor} | Speed={speed}");
+    }
+
+    public void RemoveItemStats(ItemData item)
+    {
+        damage -= item.bonusDamage;
+        armor -= item.bonusArmor;
+        speed -= item.bonusSpeed;
+
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+            agent.speed = speed;
+
+        Debug.Log($"[UNDO ITEM] - {item.itemName} revertido → Damage -{item.bonusDamage} | Armor -{item.bonusArmor} | Speed -{item.bonusSpeed}");
+        Debug.Log($"[STATS ACTUALES] Damage={damage} | Armor={armor} | Speed={speed}");
     }
 }

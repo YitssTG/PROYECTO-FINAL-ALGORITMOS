@@ -6298,9 +6298,9 @@ MonoBehaviour:
     m_ActionName: 'RightClickActions/RightClickActions[/Mouse/rightButton]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2019222662}
-        m_TargetAssemblyTypeName: CameraController, Assembly-CSharp
-        m_MethodName: 
+      - m_Target: {fileID: 2019222668}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnRightClick
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6960,6 +6960,7 @@ GameObject:
   - component: {fileID: 2019222669}
   - component: {fileID: 2019222671}
   - component: {fileID: 2019222672}
+  - component: {fileID: 2019222673}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -7112,7 +7113,7 @@ MonoBehaviour:
   experienceToNext: 50
   skillPoints: 1
   damage: 10
-  speed: 50
+  speed: 4
   armor: 0
   maxHealth: 100
   currentHealth: 0
@@ -7135,6 +7136,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   abilityDatabase: {fileID: 11400000, guid: 8ca2896d9c7b68448a52606036576ab9, type: 2}
+--- !u!114 &2019222673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019222662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1845ff7a12ba7ce4d91030091f5b1e44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2
+  attackCooldown: 2
 --- !u!1 &2035923701
 GameObject:
   m_ObjectHideFlags: 0

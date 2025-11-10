@@ -39,6 +39,18 @@ public class PlayerController : MonoBehaviour
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
+            // ¿tocamos enemigo?
+            EnemyBase enemy = hit.collider.GetComponent<EnemyBase>();
+            PlayerAutoAttack attack = GetComponent<PlayerAutoAttack>();
+
+            if (enemy != null)
+            {
+                attack.SetAttackTarget(enemy);
+                return;
+            }
+
+            // click en suelo
+            attack.ClearTarget();
             agent.stoppingDistance = stoppingDistance;
             agent.SetDestination(hit.point);
         }

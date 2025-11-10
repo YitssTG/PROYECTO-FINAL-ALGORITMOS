@@ -164,6 +164,7 @@ public class ItemGraphUI : MonoBehaviour
         selectedItem.isPurchased = true;
         purchaseHistory.Add(selectedItem);
         inventory.AddItem(selectedItem);
+        GameManager.Instance.playerStats.ApplyItemStats(selectedItem);
         UpdateUnlocks();
 
         if (infoText != null)
@@ -177,6 +178,8 @@ public class ItemGraphUI : MonoBehaviour
         ItemData last = purchaseHistory[^1];
         purchaseHistory.RemoveAt(purchaseHistory.Count - 1);
         last.isPurchased = false;
+
+        GameManager.Instance.playerStats.RemoveItemStats(last);
 
         goldManager.AddGold(last.cost);
         inventory.RemoveItem(last);

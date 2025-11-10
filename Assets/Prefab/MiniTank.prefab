@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 832183596757608239}
   - component: {fileID: 8179229096416584705}
   - component: {fileID: -3918165643155545661}
+  - component: {fileID: 5273494264417635600}
   m_Layer: 0
   m_Name: MiniTank
   m_TagString: Untagged
@@ -128,6 +129,8 @@ MonoBehaviour:
   enemyName: 
   health: 0
   damage: 0
+  rewardXP: 50
+  rewardGold: 20
   movement: {fileID: -3918165643155545661}
   tankDetection: 10
   tankAttack: 6
@@ -172,3 +175,16 @@ MonoBehaviour:
   speed: 1
   separationDistance: 1.2
   separationForce: 3
+--- !u!114 &5273494264417635600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974820351747600714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c93fd50492a97114dbe34c6f7bd6e3ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackCooldown: 1
