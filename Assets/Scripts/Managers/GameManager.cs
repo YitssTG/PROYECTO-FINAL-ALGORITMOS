@@ -5,7 +5,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Torretas disponibles")]
-    public TowerSO[] towerSOList;  // Aquí usas el SO en lugar de GameObjects
+    public TowerSO[] towerSOList;
     private int selectedTowerIndex = 0;
 
     [Header("Referencias principales")]
@@ -16,15 +16,12 @@ public class GameManager : MonoBehaviour
     [Header("Progreso del juego")]
     public int enemigosDerrotados = 0;
     public int monedasTotales = 0;
-    public int oleadaActual = 1;
-    public int incrementoDificultad = 1;
 
     [Header("Referencias externas")]
-    public GoldManager goldManager; // Referencia al GoldManager
+    public GoldManager goldManager;
 
     void Awake()
     {
-        // Singleton básico
         if (Instance == null)
         {
             Instance = this;
@@ -36,7 +33,6 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Verificar que todas las referencias estén asignadas en el Inspector
         VerificarReferencias();
     }
 
@@ -67,21 +63,13 @@ public class GameManager : MonoBehaviour
         EventManager.OnCoinsCollected -= OnCoinsAdded;
     }
 
-    // ──────────────────────────────
-    // EVENTOS
-    // ──────────────────────────────
     private void OnEnemyDead()
     {
         enemigosDerrotados++;
         Debug.Log($"GameManager: Enemigo derrotado. Total: {enemigosDerrotados}");
 
-        // Otorgar XP al jugador
         if (playerStats != null)
             playerStats.AddExperience(25);
-
-        // Verificar si se avanza de oleada
-        if (enemigosDerrotados % 10 == 0)
-            SiguienteOleada();
     }
 
     private void OnCoinsAdded(int amount)
@@ -90,35 +78,7 @@ public class GameManager : MonoBehaviour
         Debug.Log($"GameManager: +{amount} monedas. Total: {monedasTotales}");
     }
 
-    // ──────────────────────────────
-    // CONTROL DE OLEADAS Y SPAWNERS
-    // ──────────────────────────────
-    public void SiguienteOleada()
-    {
-        oleadaActual++;
-        foreach (EnemySpawner spawner in spawners)
-        {
-            if (spawner != null)
-                spawner.ActualizarDificultad(oleadaActual, incrementoDificultad);
-        }
-
-        Debug.Log($"🔥 Iniciando oleada {oleadaActual}");
-    }
-
-    public void ActivarSpawners(bool estado)
-    {
-        foreach (EnemySpawner spawner in spawners)
-        {
-            if (spawner != null)
-                spawner.SetActive(estado);
-        }
-
-        Debug.Log($"Spawner(s) {(estado ? "activados" : "desactivados")}");
-    }
-
-    // ──────────────────────────────
-    // SISTEMA DE TORRETAS
-    // ──────────────────────────────
+    // ░█████╗░ TORRETAS ░█████╗░
     public bool CanBuild()
     {
         TowerSO selectedTower = GetSelectedTowerSO();
@@ -136,7 +96,6 @@ public class GameManager : MonoBehaviour
             selectedTowerIndex = index;
     }
 
-    // Método para construir torreta en una casilla
     public void TryToBuildTower(BuildSlot slot)
     {
         TowerSO selectedTower = GetSelectedTowerSO();

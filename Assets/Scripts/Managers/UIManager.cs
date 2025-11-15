@@ -51,7 +51,7 @@ public class UIManager : MonoBehaviour
     private void UpdateGoldDisplay(int newGoldAmount)
     {
         if (goldText != null)
-            goldText.text = $"Oro: {newGoldAmount}";
+            goldText.text = $"{newGoldAmount}";
     }
 
     private void UpdateHealthDisplay(int newHealthAmount)

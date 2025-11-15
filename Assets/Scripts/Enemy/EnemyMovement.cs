@@ -6,144 +6,125 @@ public class EnemyMovement : MonoBehaviour
 {
     public Transform target;
 
-    [Header("Radios y velocidad asignados desde el prefab o script")]
-    public float detectionRadius = 5f;
-    public float attackRadius = 2f;
-    public float speed = 3f;
-
-    [Header("Separación entre enemigos")]
-    public float separationDistance = 1.2f;
-    public float separationForce = 3f;
+    [Header("Rangos y Velocidad")]
+    public float detectionRadius = 20f;
+    public float attackRadius = 15f;
+    public float speed = 3.5f;
 
     private NavMeshAgent agent;
 
-    private enum EnemyState { Walking, Chasing, Attacking }
-    private EnemyState currentState;
+    private enum State { Idle, Walking, Chasing, Attacking }
+    private State currentState = State.Idle;
 
     private Vector3 walkDestination;
     private bool hasWalkDestination = false;
 
-    public event System.Action<GameObject> OnDeath;
-
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.stoppingDistance = 0f;
         agent.speed = speed;
-
-        EnemyManager.Registrar(this);
-    }
-
-    void OnDestroy()
-    {
-        EnemyManager.Desregistrar(this);
+        agent.stoppingDistance = 0;
     }
 
     void Update()
     {
-        if (target == null)
+        // Si tiene destino pero no target → caminar
+        if (target == null && hasWalkDestination)
         {
-            WalkForward();
-            EvitarSuperposicion();
+            WalkToDestination();
             return;
         }
 
-        float distanceToTarget = Vector3.Distance(transform.position, target.position);
+        if (target == null)
+        {
+            agent.isStopped = true;
+            return;
+        }
 
-        if (distanceToTarget <= attackRadius)
-            currentState = EnemyState.Attacking;
-        else if (distanceToTarget <= detectionRadius)
-            currentState = EnemyState.Chasing;
+        float dist = Vector3.Distance(transform.position, target.position);
+
+        if (dist <= attackRadius)
+            currentState = State.Attacking;
+        else if (dist <= detectionRadius)
+            currentState = State.Chasing;
+        else if (hasWalkDestination)
+            currentState = State.Walking;
         else
-            currentState = EnemyState.Walking;
+            currentState = State.Idle;
 
         switch (currentState)
         {
-            case EnemyState.Walking: WalkForward(); break;
-            case EnemyState.Chasing:
+            case State.Chasing:
                 agent.isStopped = false;
                 agent.SetDestination(target.position);
                 break;
-            case EnemyState.Attacking:
+
+            case State.Attacking:
+                agent.isStopped = true;
+                LookAtTarget();
+                break;
+
+            case State.Walking:
+                WalkToDestination();
+                break;
+
+            default:
                 agent.isStopped = true;
                 break;
         }
-
-        EvitarSuperposicion();
     }
 
+    private void LookAtTarget()
+    {
+        if (target == null) return;
+
+        Vector3 dir = (target.position - transform.position).normalized;
+        dir.y = 0;
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            Quaternion.LookRotation(dir),
+            Time.deltaTime * 8f
+        );
+    }
+
+    // ⭐⭐ ESTE ES EL MÉTODO QUE TU SPAWNER LLAMA ⭐⭐
     public void SetWalkDestination(Vector3 destination)
     {
         walkDestination = destination;
         hasWalkDestination = true;
-        if (agent != null)
-        {
-            agent.SetDestination(walkDestination);
-            agent.isStopped = false;
-        }
+
+        agent.isStopped = false;
+        agent.SetDestination(walkDestination);
     }
 
-    private void WalkForward()
+    private void WalkToDestination()
     {
         if (!hasWalkDestination) return;
 
-        if (Vector3.Distance(transform.position, walkDestination) > 0.1f)
-        {
-            agent.isStopped = false;
-            agent.SetDestination(walkDestination);
-        }
-        else
-        {
-            agent.isStopped = true;
-        }
+        agent.isStopped = false;
+        agent.SetDestination(walkDestination);
     }
 
-    void EvitarSuperposicion()
+    // ⭐⭐ ESTE ES movement.Die() QUE LLAMA EnemyBase.Die() ⭐⭐
+    public void Die()
     {
-        Vector3 empuje = Vector3.zero;
-        int contador = 0;
-
-        for (int i = 0; i < EnemyManager.Enemigos.Count; i++)
-        {
-            EnemyMovement otro = EnemyManager.Enemigos[i];
-            if (otro == this) continue;
-
-            float dist = Vector3.Distance(transform.position, otro.transform.position);
-            if (dist < separationDistance)
-            {
-                Vector3 dir = (transform.position - otro.transform.position).normalized;
-                empuje += dir / dist;
-                contador++;
-            }
-        }
-
-        if (contador > 0)
-        {
-            empuje /= contador;
-            Vector3 nuevaPos = transform.position + empuje * separationForce * Time.deltaTime;
-            agent.Move(nuevaPos - transform.position);
-        }
-    }
-
-    public virtual void Die()
-    {
-        OnDeath?.Invoke(gameObject);
         Destroy(gameObject);
     }
 
-    void OnDrawGizmos()
+    // ⭐ GIZMOS
+    private void OnDrawGizmos()
     {
-        // Color según estado
-        switch (currentState)
-        {
-            case EnemyState.Walking: Gizmos.color = Color.gray; break;
-            case EnemyState.Chasing: Gizmos.color = Color.blue; break;
-            case EnemyState.Attacking: Gizmos.color = Color.red; break;
-        }
-
-        // Dibujar radio de detección
+        Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
-        // Dibujar radio de ataque
+
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRadius);
+
+        if (hasWalkDestination)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(transform.position, walkDestination);
+        }
     }
 }

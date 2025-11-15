@@ -20,10 +20,10 @@ public class WaveManager : MonoBehaviour
     public int incrementoPorOleada = 2;
 
     [Header("Mini Jefe")]
-    public GameObject miniJefePrefab;          
-    public Transform puntoMiniJefe;           
-    public int oleadaMiniJefe = 3;             
-    public int frecuenciaMiniJefe = 3;        
+    public GameObject miniJefePrefab;
+    public Transform puntoMiniJefe;
+    public int oleadaMiniJefe = 3;
+    public int frecuenciaMiniJefe = 3;
 
     private bool isWaveActive = false;
     private float timer;
@@ -44,9 +44,11 @@ public class WaveManager : MonoBehaviour
     {
         while (true)
         {
+            // PREPARACIÓN
             isWaveActive = false;
             currentWave++;
             Debug.Log($"Preparación antes de la oleada {currentWave}");
+
             SetSpawnersActive(false);
 
             timer = preparationTime;
@@ -57,9 +59,11 @@ public class WaveManager : MonoBehaviour
                 yield return null;
             }
 
+            // INICIA OLEADA
             isWaveActive = true;
-            Debug.Log($"Comienza la oleada {currentWave}");
+            Debug.Log($"🔥 Comienza la oleada {currentWave}");
 
+            // Actualizar dificultad SOLO AQUÍ
             for (int i = 0; i < spawners.Length; i++)
             {
                 if (spawners[i] != null)
@@ -68,10 +72,9 @@ public class WaveManager : MonoBehaviour
 
             SetSpawnersActive(true);
 
-            //if (miniJefePrefab != null && DebeAparecerMiniJefe(currentWave))
-            //{
-            //    SpawnMiniJefe();
-            //}
+            // Mini Jefe desactivado por ahora
+            // if (miniJefePrefab != null && DebeAparecerMiniJefe(currentWave))
+            //     SpawnMiniJefe();
 
             timer = waveDuration;
             while (timer > 0)
@@ -80,6 +83,8 @@ public class WaveManager : MonoBehaviour
                 timer -= Time.deltaTime;
                 yield return null;
             }
+
+            // FIN OLEADA
             Debug.Log($"Oleada {currentWave} finalizada");
             SetSpawnersActive(false);
         }
@@ -90,25 +95,6 @@ public class WaveManager : MonoBehaviour
         if (wave < oleadaMiniJefe) return false;
         return (wave - oleadaMiniJefe) % frecuenciaMiniJefe == 0;
     }
-
-    //private void SpawnMiniJefe()
-    //{
-    //    Vector3 spawnPos;
-
-    //    if (puntoMiniJefe != null)
-    //        spawnPos = puntoMiniJefe.position;
-    //    else if (spawners != null && spawners.Length > 0)
-    //        spawnPos = spawners[0].transform.position + new Vector3(0, 0, 2);
-    //    else
-    //        spawnPos = Vector3.zero;
-
-    //    GameObject jefe = Instantiate(miniJefePrefab, spawnPos, Quaternion.identity);
-    //    Debug.Log($"Mini Jefe generado en oleada {currentWave}");
-
-    //    EnemyMovement mov = jefe.GetComponent<EnemyMovement>();
-    //    if (mov != null && spawners.Length > 0)
-    //        mov.target = spawners[0].player; 
-    //}
 
     private void SetSpawnersActive(bool active)
     {

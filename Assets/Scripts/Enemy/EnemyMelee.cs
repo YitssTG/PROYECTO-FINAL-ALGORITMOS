@@ -2,35 +2,30 @@ using UnityEngine;
 
 public class EnemyMelee : EnemyBase
 {
-    [Header("Configuración melee")]
-    public float meleeDetection = 3f;
-    public float meleeAttack = 1.5f;
-    public float meleeSpeed = 3.5f;
+    [Header("Parámetros")]
+    public float detectionRadius = 3f;
+    public float attackRadius = 1.5f;
+    public float moveSpeed = 3.5f;
 
     protected override void Awake()
     {
         base.Awake();
-        enemyName = "Melee";
-        health = 150;
-        damage = 10;
 
-        if (movement != null)
-        {
-            movement.detectionRadius = meleeDetection;
-            movement.attackRadius = meleeAttack;
-            movement.speed = meleeSpeed;
-        }
+        enemyName = "Melee";
+        movement.detectionRadius = detectionRadius;
+        movement.attackRadius = attackRadius;
+        movement.speed = moveSpeed;
     }
 
     public override void Die()
     {
-        rewardGold = 30; // Oro para enemigo Melee
+        rewardGold = 30;
         rewardXP = 60;
-        base.Die(); // Llamamos a la lógica común de la base
+        base.Die();
     }
 
     public override void Attack()
     {
-        Debug.Log($"{enemyName} ataca cuerpo a cuerpo con {damage} de daño.");
+        Debug.Log($"{enemyName} golpea cuerpo a cuerpo con {damage} de daño.");
     }
 }

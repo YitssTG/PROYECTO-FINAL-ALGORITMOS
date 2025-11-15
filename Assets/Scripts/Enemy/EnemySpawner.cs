@@ -4,11 +4,9 @@ using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("Configuración del Spawner")]
     public Transform player;
-    public Transform endPoint; // Destino del carril (top, mid, bot)
+    public Transform endPoint;
 
-    [Header("Tipos de enemigos y cantidad por grupo")]
     public GameObject enemyMeleePrefab;
     public int meleePorGrupo = 0;
 
@@ -22,19 +20,9 @@ public class EnemySpawner : MonoBehaviour
     public float intervaloEntreGrupos = 20f;
     public float intervaloEntreEnemigos = 0.5f;
 
-    private CustomLinkedList<GameObject> enemigosVivos = new CustomLinkedList<GameObject>();
+    private List<GameObject> enemigosVivos = new List<GameObject>();
     private bool puedeSpawnear = false;
     private float tiempoSiguienteGrupo = 0f;
-
-    void OnEnable()
-    {
-        EventManager.OnEnemyDefeated += ContarMuerte;
-    }
-
-    void OnDisable()
-    {
-        EventManager.OnEnemyDefeated -= ContarMuerte;
-    }
 
     void Update()
     {
@@ -45,11 +33,6 @@ public class EnemySpawner : MonoBehaviour
         {
             StartCoroutine(SpawnGrupoConDelay());
             tiempoSiguienteGrupo = intervaloEntreGrupos;
-        }
-
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            EliminarTodos();
         }
     }
 
@@ -63,8 +46,6 @@ public class EnemySpawner : MonoBehaviour
 
         for (int i = 0; i < miniTankPorGrupo; i++)
             yield return SpawnEnemy(enemyMiniTankPrefab);
-
-        Debug.Log($"Spawner {name} generó {meleePorGrupo} melee, {rangedPorGrupo} ranged, {miniTankPorGrupo} miniTank. Total vivos: {enemigosVivos.Count}");
     }
 
     private IEnumerator SpawnEnemy(GameObject prefab)
@@ -72,12 +53,11 @@ public class EnemySpawner : MonoBehaviour
         if (prefab == null) yield break;
 
         GameObject enemigo = Instantiate(prefab, GetRandomPosition(), Quaternion.identity);
-        EnemyMovement mov = enemigo.GetComponent<EnemyMovement>();
 
+        EnemyMovement mov = enemigo.GetComponent<EnemyMovement>();
         if (mov != null)
         {
             mov.target = player;
-            mov.OnDeath += OnEnemyDeath;
 
             if (endPoint != null)
                 mov.SetWalkDestination(endPoint.position);
@@ -94,84 +74,21 @@ public class EnemySpawner : MonoBehaviour
         return pos;
     }
 
-    private void OnEnemyDeath(GameObject enemigo)
-    {
-        if (enemigo != null) // Asegurarse de que el enemigo no haya sido destruido previamente
-        {
-            enemigosVivos.Remove(enemigo);
-            Debug.Log($"Enemigo eliminado. Quedan: {enemigosVivos.Count}");
-        }
-    }
-
-    private void ContarMuerte()
-    {
-        Debug.Log($"Spawner {name} detectó una muerte mediante evento global.");
-    }
-
     public void SetActive(bool active)
     {
         puedeSpawnear = active;
         tiempoSiguienteGrupo = 0f;
-
-        if (active)
-            Debug.Log($"Spawner {name} ACTIVADO");
-        else
-            Debug.Log($"Spawner {name} DESACTIVADO");
     }
 
+    // ⭐⭐⭐ Este método DEBE existir para evitar tu error
     public void ActualizarDificultad(int numeroOleada, int incremento)
     {
         meleePorGrupo += incremento;
         rangedPorGrupo += incremento / 2;
         miniTankPorGrupo += incremento / 2;
+
         intervaloEntreGrupos = Mathf.Max(5f, intervaloEntreGrupos - 1f);
 
-        Debug.Log($"Spawner {name}: dificultad actualizada. Oleada {numeroOleada}, Melee: {meleePorGrupo}, Ranged: {rangedPorGrupo}, MiniTank: {miniTankPorGrupo}, Intervalo: {intervaloEntreGrupos}s");
-    }
-
-    private void EliminarTodos()
-    {
-        // Contadores para el oro basado en los tipos de enemigos
-        int totalMeleeGold = 0;
-        int totalRangedGold = 0;
-        int totalMiniTankGold = 0;
-
-        // Contamos los enemigos de cada tipo antes de eliminarlos
-        foreach (var enemigo in enemigosVivos.GetAll())
-        {
-            if (enemigo != null)
-            {
-                EnemyBase enemyBase = enemigo.GetComponent<EnemyBase>();
-
-                if (enemyBase != null)
-                {
-                    // Aseguramos que estamos contando los enemigos de acuerdo a su tipo
-                    if (enemyBase is EnemyMelee)
-                    {
-                        totalMeleeGold += 30; // Oro por enemigo melee
-                    }
-                    else if (enemyBase is EnemyRanged)
-                    {
-                        totalRangedGold += 40; // Oro por enemigo ranged
-                    }
-                    else if (enemyBase is EnemyMiniTank)
-                    {
-                        totalMiniTankGold += 70; // Oro por enemigo miniTank
-                    }
-                }
-
-                // Eliminamos el enemigo de la escena
-                Destroy(enemigo);
-            }
-        }
-
-        // Actualizamos el oro en GoldManager
-        GoldManager.Instance.AddGold(totalMeleeGold + totalRangedGold + totalMiniTankGold);
-
-        // Limpiamos la lista de enemigos vivos
-        enemigosVivos.Clear();
-
-        // Log para pruebas
-        Debug.Log($"Todos los enemigos fueron eliminados manualmente (tecla J). Oro total agregado: {totalMeleeGold + totalRangedGold + totalMiniTankGold}");
+        Debug.Log($"Spawner {name}: dificultad actualizada en oleada {numeroOleada}");
     }
 }
