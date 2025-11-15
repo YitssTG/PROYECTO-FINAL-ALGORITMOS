@@ -34,7 +34,9 @@ public class PlayerController : MonoBehaviour
 
     public void OnRightClick(InputAction.CallbackContext context)
     {
-        if (!context.performed) return;
+        if (!context.performed || !Mouse.current.rightButton.wasPressedThisFrame)
+            return;
+
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit))
