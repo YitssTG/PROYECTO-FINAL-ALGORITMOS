@@ -10,6 +10,10 @@ public class PlayerController : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private float stoppingDistance = 0.5f;
 
+    [Header("Click Indicator")]
+    public GameObject clickIndicatorPrefab;
+
+
     private PlayerStats playerStats;
 
     void Awake()
@@ -37,10 +41,14 @@ public class PlayerController : MonoBehaviour
         if (!context.performed || !Mouse.current.rightButton.wasPressedThisFrame)
             return;
 
-
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
+            if (clickIndicatorPrefab != null)
+            {
+                Instantiate(clickIndicatorPrefab, hit.point + Vector3.up * 0.05f, Quaternion.identity);
+            }
+
             // ¿tocamos enemigo?
             EnemyBase enemy = hit.collider.GetComponent<EnemyBase>();
             PlayerAutoAttack attack = GetComponent<PlayerAutoAttack>();

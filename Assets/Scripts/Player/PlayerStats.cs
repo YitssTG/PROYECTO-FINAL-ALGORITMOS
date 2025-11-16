@@ -17,6 +17,8 @@ public class PlayerStats : MonoBehaviour
     // Salud del jugador
     public int maxHealth = 100;
     public int currentHealth;
+    public bool isInvulnerable = false;
+
 
     // Eventos para actualizar la UI
     public UnityEvent<int> OnHealthChanged = new();
@@ -83,6 +85,11 @@ public class PlayerStats : MonoBehaviour
     // Método para recibir daño
     public void TakeDamage(int amount)
     {
+        if (isInvulnerable)
+        {
+            Debug.Log("Jugador es invulnerable, no recibe daño.");
+            return;
+        }
         currentHealth -= amount;
         if (currentHealth < 0) currentHealth = 0;
 

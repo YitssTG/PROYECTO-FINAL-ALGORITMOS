@@ -4,6 +4,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewAbility", menuName = "Abilities/Ability")]
 public class Ability : ScriptableObject
 {
+    [Header("Parámetros estilo LoL")]
+    public float range = 8f;                 // Q, E, R usan esto
+    public float projectileSpeed = 20f;      // Para habilidades tipo proyectil
+    public float explosionRadius = 2f;       // Para daño AOE
+    public float damageBase = 40f;           // Daño inicial
+    public float damagePerLevel = 20f;       // Daño extra por nivel
+
+    [Header("Buffs / Efectos")]
+    public float duration = 3f;              // W: duración invulnerabilidad, modificable
+    public float dashDistance = 6f;          // E
+    public float meteorDelay = 1.5f;         // R
+    public float meteorRadius = 4f;
+
     [Header("Datos base")]
     public string abilityName;
     public float cooldown;
