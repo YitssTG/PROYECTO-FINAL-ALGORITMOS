@@ -22,6 +22,6 @@ MonoBehaviour:
   meteorDelay: 1.5
   meteorRadius: 4
   abilityName: Bola de Fuego
-  cooldown: 4.0499997
+  cooldown: 10
   maxLevel: 5
   locked: 0

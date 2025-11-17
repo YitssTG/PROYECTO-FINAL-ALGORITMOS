@@ -66,6 +66,7 @@ public class AbilitySystem : MonoBehaviour
         }
     }
 
+
     private bool IsAiming()
     {
         return aimingSystem != null && aimingSystem.IsAiming;
@@ -149,28 +150,32 @@ public class AbilitySystem : MonoBehaviour
     }
 
     // ---------------- LANZAR HABILIDAD ----------------
-    public void TryCast(AbilityType type)
+    public bool TryCast(AbilityType type)
     {
-        if (!abilities.ContainsKey(type)) return;
+        if (!abilities.ContainsKey(type))
+            return false;
 
         Ability ab = abilities[type];
         AbilityState st = state[type];
 
+        // no desbloqueada
         if (!st.unlocked || st.level <= 0)
-        {
-            Debug.Log($"[{type}] No desbloqueada");
-            return;
-        }
+            return false;
 
-        if (Time.time < st.lastCastTime + ab.cooldown)
-        {
-            return;
-        }
+        // ▶️ usar cooldown del ScriptableObject (NO del state)
+        if (!ab.CanCast())
+            return false;
 
-        st.lastCastTime = Time.time;
+        // actualizar nivel real
         ab.level = st.level;
 
-        ab.OnCast?.Invoke();
+        // ▶️ lanzar habilidad y activar cooldown interno
+        ab.Cast();
+
+        // si deseas registrar aquí también (opcional)
+        st.lastCastTime = Time.time;
+
+        return true;
     }
 
     // ---------------- MEJORAR HABILIDADES ----------------

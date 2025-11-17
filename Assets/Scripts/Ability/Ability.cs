@@ -72,4 +72,25 @@ public class Ability : ScriptableObject
             Debug.Log($"[{abilityName}] ya está al nivel máximo.");
         }
     }
+
+    // ─────────────────────────────────────
+    // 🔹 Helpers para la UI de cooldown
+    // ─────────────────────────────────────
+
+    // Tiempo que queda de cooldown (0 si ya está lista)
+    public float GetCooldownRemaining()
+    {
+        if (cooldown <= 0f) return 0f;
+
+        float endTime = lastCastTime + cooldown;
+        if (Time.time >= endTime) return 0f;
+
+        return endTime - Time.time;
+    }
+
+    // ¿Está en cooldown?
+    public bool IsOnCooldown()
+    {
+        return GetCooldownRemaining() > 0f;
+    }
 }

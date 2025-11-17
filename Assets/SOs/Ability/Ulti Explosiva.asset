@@ -22,6 +22,6 @@ MonoBehaviour:
   meteorDelay: 1.5
   meteorRadius: 4
   abilityName: Ulti
-  cooldown: 10
+  cooldown: 50
   maxLevel: 3
   locked: 0

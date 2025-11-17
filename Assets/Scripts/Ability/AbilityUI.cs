@@ -1,14 +1,19 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
 public class AbilityUI : MonoBehaviour
 {
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     public AbilityType abilityKey = AbilityType.PrimaryAb;
     public Button upgradeButton;
     public TextMeshProUGUI levelText;
+
+    [Header("Cooldown UI")]
+    public GameObject cooldownMask;      // Panel negro encima del icono
+    public Image cooldownFill;           // Cuadrado negro con Fill
+    public TextMeshProUGUI cooldownText; // Segundos
 
     public float waitTimeout = 5f;
 
@@ -20,6 +25,7 @@ public class AbilityUI : MonoBehaviour
     {
         float timer = 0f;
 
+        // ESPERAR A QUE SE INICIALICEN LOS SISTEMAS
         while ((GameManager.Instance == null ||
                 GameManager.Instance.abilitySystem == null ||
                 !GameManager.Instance.abilitySystem.abilities.ContainsKey(abilityKey) ||
@@ -30,41 +36,32 @@ public class AbilityUI : MonoBehaviour
             yield return null;
         }
 
-        if (GameManager.Instance == null || GameManager.Instance.abilitySystem == null || GameManager.Instance.playerStats == null)
-        {
-            Debug.LogError("AbilityUI: GameManager o PlayerStats no est�n listos.");
-            enabled = false;
-            yield break;
-        }
-
         gm = GameManager.Instance;
         playerStats = gm.playerStats;
         abilityRef = gm.abilitySystem.abilities[abilityKey];
 
-        if (upgradeButton == null)
-        {
-            Debug.LogError("AbilityUI: upgradeButton no asignado.");
-            enabled = false;
-            yield break;
-        }
+        // 🔹 COOLdown UI inicia apagado SIEMPRE
+        if (cooldownMask != null)
+            cooldownMask.SetActive(false);
 
+        // BOTÓN DE UPGRADE CONFIG
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(OnUpgradeClicked);
 
-        upgradeButton.gameObject.SetActive(false);
         UpdateUI();
     }
 
     void Update()
     {
-        if (!enabled || abilityRef == null || playerStats == null) return;
+        if (abilityRef == null) return;
         UpdateUI();
     }
 
     private void UpdateUI()
     {
-        if (abilityRef == null || playerStats == null) return;
+        if (abilityRef == null) return;
 
+        // ---------- SISTEMA DE UPGRADE ----------
         bool hasPoints = playerStats.skillPoints > 0;
         bool notMax = abilityRef.level < abilityRef.maxLevel;
         bool canUpgrade = hasPoints && notMax;
@@ -73,25 +70,42 @@ public class AbilityUI : MonoBehaviour
             canUpgrade = false;
 
         upgradeButton.gameObject.SetActive(canUpgrade);
+        levelText.text = "Lv " + abilityRef.level.ToString();
 
-        if (levelText != null)
-            levelText.text = "Lv " + abilityRef.level.ToString();
+        // ---------- COOLDOWN VISUAL ----------
+        float remaining = abilityRef.GetCooldownRemaining();
+        bool onCooldown = remaining > 0.05f;  // evita activar por errores de precisión
+
+        if (onCooldown)
+        {
+            // ACTIVAR MÁSCARA (si no está ya activa)
+            if (!cooldownMask.activeSelf)
+                cooldownMask.SetActive(true);
+
+            // TEXTO DE SEGUNDOS RESTANTES
+            if (cooldownText != null)
+                cooldownText.text = Mathf.Ceil(remaining).ToString();
+
+            // FILL DEL CUADRADO (0 a 1)
+            if (cooldownFill != null && abilityRef.cooldown > 0f)
+            {
+                cooldownFill.fillAmount = remaining / abilityRef.cooldown;
+            }
+        }
+        else
+        {
+            // SI YA ACABÓ EL COOLDOWN, OCULTAR LA MÁSCARA
+            if (cooldownMask.activeSelf)
+                cooldownMask.SetActive(false);
+        }
     }
 
     private void OnUpgradeClicked()
     {
-        if (playerStats == null) return;
-
         bool upgraded = playerStats.SpendSkillPoint(abilityKey);
         if (upgraded)
             Debug.Log($"Habilidad {abilityKey} mejorada.");
 
         UpdateUI();
-    }
-
-    void OnDestroy()
-    {
-        if (upgradeButton != null)
-            upgradeButton.onClick.RemoveListener(OnUpgradeClicked);
     }
 }

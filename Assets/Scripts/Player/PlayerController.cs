@@ -13,8 +13,8 @@ public class PlayerController : MonoBehaviour
     [Header("Click Indicator")]
     public GameObject clickIndicatorPrefab;
 
-
     private PlayerStats playerStats;
+    private AbilityAimingSystem aiming;   // ← referencia al sistema de apuntado
 
     void Awake()
     {
@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
         cam = Camera.main;
         playerStats = GameManager.Instance.playerStats;
 
-
+        aiming = GetComponent<AbilityAimingSystem>();
     }
 
     void Update()
@@ -34,12 +34,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
-
     public void OnRightClick(InputAction.CallbackContext context)
     {
         if (!context.performed || !Mouse.current.rightButton.wasPressedThisFrame)
             return;
+
+        // ──────────────────────────────────────────────
+        // BLOQUEAR MOVIMIENTO SI:
+        //  - NO estamos apuntando
+        //  - Y SHIFT está presionado
+        // ──────────────────────────────────────────────
+        if (aiming != null && !aiming.IsAiming && Keyboard.current.shiftKey.isPressed)
+        {
+            // Estás manteniendo Shift para entrar a modo apuntado → no se mueve
+            return;
+        }
+
+        // A PARTIR DE AQUÍ: movimiento normal (sirve tanto si estabas apuntando
+        // y cancelas con click derecho, como si no estabas apuntando).
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit))
@@ -49,7 +61,6 @@ public class PlayerController : MonoBehaviour
                 Instantiate(clickIndicatorPrefab, hit.point + Vector3.up * 0.05f, Quaternion.identity);
             }
 
-            // ¿tocamos enemigo?
             EnemyBase enemy = hit.collider.GetComponent<EnemyBase>();
             PlayerAutoAttack attack = GetComponent<PlayerAutoAttack>();
 

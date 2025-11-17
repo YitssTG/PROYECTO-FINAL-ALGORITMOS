@@ -24,7 +24,10 @@ public class AbilityAimingSystem : MonoBehaviour
     public float rImpactMultiplier = 1f;
 
     [Header("Offsets")]
-    public float qForwardOffset = 1f;   // distancia desde la cola, NO SE TOCA
+    public float qForwardOffset = 1f;   // distancia desde la cola
+
+    [Header("Altura indicadores")]
+    public float indicatorsY = 0.05f;   // altura fija para TODOS los indicadores
 
     private GameObject currentIndicator;
     private GameObject currentIndicatorSecondary;
@@ -42,30 +45,39 @@ public class AbilityAimingSystem : MonoBehaviour
         if (cam == null) cam = Camera.main;
     }
 
-    // ----------------- SHIFT + Q/W/E/R -----------------
+    // ──────────────────────────────────────────────
+    // INPUTS: SHIFT + Q/W/E/R → ENTRAR A MODO APUNTADO
+    // ──────────────────────────────────────────────
 
     public void OnAbilityQ(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed)
+        if (ctx.performed && Keyboard.current.shiftKey.isPressed && !isAiming)
             StartAiming(AbilityType.PrimaryAb);
     }
+
     public void OnAbilityW(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed)
+        if (ctx.performed && Keyboard.current.shiftKey.isPressed && !isAiming)
             StartAiming(AbilityType.SecondaryAb);
     }
+
     public void OnAbilityE(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed)
-            StartAiming(AbilityType.ThirdAb);
+        // La E NO usa modo de apuntado
+        // Si presionas SHIFT + E → no apuntar, castear normal
+        if (ctx.performed)
+            abilitySystem.TryCast(AbilityType.ThirdAb);
     }
+
     public void OnAbilityR(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed)
+        if (ctx.performed && Keyboard.current.shiftKey.isPressed && !isAiming)
             StartAiming(AbilityType.Ultimate);
     }
 
-    // ----------------- INICIAR APUNTADO -----------------
+    // ──────────────────────────────────────────────
+    // ENTRAR A MODO APUNTADO
+    // ──────────────────────────────────────────────
 
     void StartAiming(AbilityType type)
     {
@@ -77,13 +89,12 @@ public class AbilityAimingSystem : MonoBehaviour
 
         switch (type)
         {
-            case AbilityType.PrimaryAb: // Q
+            // ------------- Q (flecha) -------------
+            case AbilityType.PrimaryAb:
                 currentIndicator = Instantiate(qIndicatorPrefab);
 
-                // buscar la cola
                 qTailPivot = currentIndicator.transform.Find("Tail");
 
-                // ESCALA del mesh
                 Transform gfx = currentIndicator.transform.Find("GFX");
                 if (gfx != null)
                 {
@@ -95,67 +106,127 @@ public class AbilityAimingSystem : MonoBehaviour
                         qScaleWidth             // ancho
                     );
                 }
+
+                currentIndicator.transform.position = new Vector3(
+                    transform.position.x,
+                    indicatorsY,
+                    transform.position.z
+                );
                 break;
 
-            case AbilityType.SecondaryAb: // W
+            // ------------- W (radio en el player) -------------
+            case AbilityType.SecondaryAb:
                 currentIndicator = Instantiate(wIndicatorPrefab, transform);
-                currentIndicator.transform.localPosition = Vector3.zero;
 
                 float wr = currentData.explosionRadius * wRadiusMultiplier * 2f;
                 currentIndicator.transform.localScale = new Vector3(wr, wr, wr);
+
+                currentIndicator.transform.position = new Vector3(
+                    transform.position.x,
+                    indicatorsY,
+                    transform.position.z
+                );
                 break;
 
-            case AbilityType.Ultimate: // R
+            // ------------- E (por ahora sin indicador) -------------
+            case AbilityType.ThirdAb:
+                // si luego quieres un indicador, se agrega aquí
+                break;
 
+            // ------------- R (radio máximo + target) -------------
+            case AbilityType.Ultimate:
+
+                // círculo grande (rango máximo)
                 currentIndicator = Instantiate(rRangePrefab, transform);
 
                 float rr = currentData.range * rRangeMultiplier * 2f;
                 currentIndicator.transform.localScale = new Vector3(rr, rr, rr);
 
+                currentIndicator.transform.position = new Vector3(
+                    transform.position.x,
+                    indicatorsY,
+                    transform.position.z
+                );
+
+                // círculo pequeño (punto donde cae)
                 currentIndicatorSecondary = Instantiate(rTargetPrefab);
 
                 float ir = currentData.meteorRadius * rImpactMultiplier * 2f;
                 currentIndicatorSecondary.transform.localScale = new Vector3(ir, ir, ir);
+
+                currentIndicatorSecondary.transform.position = new Vector3(
+                    transform.position.x,
+                    indicatorsY,
+                    transform.position.z
+                );
                 break;
         }
     }
 
-    // ----------------- UPDATE -----------------
+    // ──────────────────────────────────────────────
+    // UPDATE MODO APUNTADO
+    // ──────────────────────────────────────────────
 
     void Update()
     {
         if (!isAiming) return;
 
-        if (!Keyboard.current.shiftKey.isPressed ||
-            Mouse.current.leftButton.wasPressedThisFrame ||
-            Keyboard.current.escapeKey.wasPressedThisFrame)
+        // ESC cancela sin mover
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             EndAiming();
             return;
         }
 
+        // Plano horizontal a altura fija (no usa colliders)
+        Plane groundPlane = new Plane(Vector3.up, new Vector3(0, indicatorsY, 0));
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (!Physics.Raycast(ray, out RaycastHit hit)) return;
 
-        Vector3 point = hit.point;
+        float dist;
+        if (!groundPlane.Raycast(ray, out dist))
+            return;
 
-        if (currentAbility == AbilityType.PrimaryAb) UpdateQ(point);
-        if (currentAbility == AbilityType.Ultimate) UpdateR(point);
+        Vector3 point = ray.GetPoint(dist);
 
+        // Actualizar indicadores según habilidad
+        if (currentAbility == AbilityType.PrimaryAb)
+            UpdateQ(point);
+        else if (currentAbility == AbilityType.Ultimate)
+            UpdateR(point);
+        // W no necesita update: es solo radio alrededor del player
+        // E por ahora sin indicador
+
+        // ───── CONFIRMAR (CLICK IZQUIERDO) ─────
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            bool launched = abilitySystem.TryCast(currentAbility);
+
+            // SOLO cerrar si realmente lanzó
+            if (launched)
+                EndAiming();
+
+            return;
+        }
+
+        // ───── CANCELAR (CLICK DERECHO) ─────
+        // Aquí NO bloqueamos movimiento: PlayerController se encargará
         if (Mouse.current.rightButton.wasPressedThisFrame)
         {
-            abilitySystem.TryCast(currentAbility);
             EndAiming();
+            // no hacemos return para no interferir con otros sistemas
         }
     }
 
-    // ----------------- Q (NO SE MODIFICÓ LÓGICA, SOLO ESCALA) -----------------
+    // ──────────────────────────────────────────────
+    // Q → FLECHA
+    // ──────────────────────────────────────────────
 
     void UpdateQ(Vector3 point)
     {
         if (!currentIndicator) return;
 
         Vector3 playerPos = transform.position;
+        playerPos.y = indicatorsY;
 
         Vector3 dir = point - playerPos;
         dir.y = 0;
@@ -167,27 +238,37 @@ public class AbilityAimingSystem : MonoBehaviour
         currentIndicator.transform.rotation = q;
 
         Vector3 finalPos = playerPos + currentIndicator.transform.forward * qForwardOffset;
-        finalPos.y = playerPos.y;
+        finalPos.y = indicatorsY;
 
         currentIndicator.transform.position = finalPos;
     }
 
-    // ----------------- R -----------------
+    // ──────────────────────────────────────────────
+    // R → rango máximo + punto de impacto
+    // ──────────────────────────────────────────────
 
     void UpdateR(Vector3 point)
     {
-        Vector3 dir = point - transform.position;
+        Vector3 playerPos = transform.position;
+        playerPos.y = indicatorsY;
+
+        Vector3 dir = point - playerPos;
         dir.y = 0;
 
         float max = currentData.range;
-
         if (dir.magnitude > max)
-            point = transform.position + dir.normalized * max;
+            point = playerPos + dir.normalized * max;
 
-        currentIndicatorSecondary.transform.position = point;
+        currentIndicatorSecondary.transform.position = new Vector3(
+            point.x,
+            indicatorsY,
+            point.z
+        );
     }
 
-    // ----------------- CANCELAR -----------------
+    // ──────────────────────────────────────────────
+    // SALIR DE MODO APUNTADO
+    // ──────────────────────────────────────────────
 
     void EndAiming()
     {
@@ -198,6 +279,8 @@ public class AbilityAimingSystem : MonoBehaviour
         if (currentIndicator) Destroy(currentIndicator);
         if (currentIndicatorSecondary) Destroy(currentIndicatorSecondary);
 
+        currentIndicator = null;
+        currentIndicatorSecondary = null;
         qTailPivot = null;
     }
 }
