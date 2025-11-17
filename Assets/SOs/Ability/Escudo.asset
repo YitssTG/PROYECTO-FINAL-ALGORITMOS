@@ -21,7 +21,7 @@ MonoBehaviour:
   dashDistance: 6
   meteorDelay: 1.5
   meteorRadius: 4
-  abilityName: Dash
-  cooldown: 30
+  abilityName: Escudo
+  cooldown: 2
   maxLevel: 5
   locked: 0

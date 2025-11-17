@@ -1,5 +1,5 @@
-using DG.Tweening;
 using UnityEngine;
+using DG.Tweening;
 
 public class MeteorProjectile : MonoBehaviour
 {
@@ -8,9 +8,11 @@ public class MeteorProjectile : MonoBehaviour
     public float radius = 4f;
     public int damage = 100;
 
+    // capa de enemigos (pon la Layer correcta en el inspector)
+    public LayerMask enemyLayer;
+
     void Start()
     {
-        // Caída con DOTween
         transform.DOMove(targetPosition + Vector3.up * 0.5f, delay)
             .SetEase(Ease.InQuad)
             .OnComplete(Explode);
@@ -18,21 +20,30 @@ public class MeteorProjectile : MonoBehaviour
 
     void Explode()
     {
-        // Daño en área usando EnemyManager
-        foreach (var mov in EnemyManager.Enemigos)
+        Debug.Log($"[Meteor] Explode en {targetPosition} | radius={radius}");
+
+        Collider[] hits = Physics.OverlapSphere(targetPosition, radius, enemyLayer);
+
+        Debug.Log($"[Meteor] Enemigos encontrados: {hits.Length}");
+
+        foreach (var hit in hits)
         {
-            if (mov == null) continue;
-            float dist = Vector3.Distance(targetPosition, mov.transform.position);
-            if (dist <= radius)
+            EnemyBase eb = hit.GetComponent<EnemyBase>();
+            if (eb != null)
             {
-                EnemyBase eb = mov.GetComponent<EnemyBase>();
-                if (eb != null)
-                    eb.TakeDamage(damage);
+                Debug.Log($"[Meteor] DAÑO a {hit.name} por {damage}");
+                eb.TakeDamage(damage);
             }
         }
 
-        // Aquí podrías instanciar un prefab de explosión (VFX)
+        // TODO: instanciar VFX de explosión si quieres
 
         Destroy(gameObject);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(targetPosition, radius);
     }
 }

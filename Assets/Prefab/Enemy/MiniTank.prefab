@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -3918165643155545661}
   - component: {fileID: 5273494264417635600}
   - component: {fileID: 8179229096416584705}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: MiniTank
   m_TagString: Untagged
   m_Icon: {fileID: 0}

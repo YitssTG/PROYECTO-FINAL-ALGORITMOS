@@ -16,9 +16,19 @@ public class AbilityEffectsController : MonoBehaviour
     public GameObject auraPrefab;
     public GameObject meteorPrefab;
 
+    private bool alreadySubscribed = false;
+
     IEnumerator Start()
     {
         Debug.Log("[Effects] Start()");
+
+        if (alreadySubscribed)
+        {
+            Debug.LogWarning("[Effects] YA ESTABA SUSCRITO → evitando duplicado");
+            yield break;
+        }
+
+        alreadySubscribed = true;
 
         if (abilitySystem == null)
             abilitySystem = GetComponent<AbilitySystem>();
@@ -29,7 +39,6 @@ public class AbilityEffectsController : MonoBehaviour
         if (cam == null)
             cam = Camera.main;
 
-        // ⚠️ ESPERAR a que AbilitySystem inicialice el diccionario
         float t = 0f;
         while ((abilitySystem == null || abilitySystem.abilities.Count == 0) && t < 5f)
         {
@@ -115,10 +124,14 @@ public class AbilityEffectsController : MonoBehaviour
 
         Debug.Log($"[Effects] Raycast hit → {hit.collider.name} en {hit.point}");
 
-        Vector3 direction = (hit.point - firePoint.position).normalized;
+        // 🌟 DIRECCIÓN HORIZONTAL REAL
+        Vector3 dir = hit.point - firePoint.position;
+        dir.y = 0f;               // ← IGNORA ALTURA DEL TERRENO
+        Vector3 direction = dir.normalized;
 
         Debug.Log("[Effects] Instanciando Fireball…");
-        GameObject fb = Instantiate(fireballPrefab, firePoint.position, Quaternion.LookRotation(direction));
+        Vector3 spawnPos = firePoint.position + Vector3.down * 0.3f; // Baja un poco
+        GameObject fb = Instantiate(fireballPrefab, spawnPos, Quaternion.LookRotation(direction));
 
         if (fb == null)
         {
@@ -186,52 +199,38 @@ public class AbilityEffectsController : MonoBehaviour
     // ─────────── DASH (E) ───────────
     void CastDash()
     {
-        Debug.Log("[Effects] CastDash() llamado.");
-
         Ability ab = abilitySystem.abilities[AbilityType.ThirdAb];
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
 
-        if (cam == null || agent == null)
-        {
-            Debug.LogWarning("[Effects] Dash: falta cam o NavMeshAgent.");
-            return;
-        }
-
+        // Ray del mouse al suelo
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         if (!Physics.Raycast(ray, out RaycastHit hit))
-        {
-            Debug.LogWarning("[Effects] Dash: raycast no golpea nada.");
             return;
-        }
 
-        Vector3 dir = (hit.point - transform.position);
+        // Dirección solo en plano
+        Vector3 dir = hit.point - transform.position;
         dir.y = 0f;
 
-        if (dir.sqrMagnitude <= 0.01f)
-        {
-            Debug.LogWarning("[Effects] Dash: dirección casi cero.");
+        // Si el mouse está muy cerca, no hacer dos movimientos
+        if (dir.sqrMagnitude < 0.01f)
             return;
-        }
 
-        float dist = Mathf.Min(dir.magnitude, ab.dashDistance);
-        Vector3 target = transform.position + dir.normalized * dist;
+        float mouseDist = dir.magnitude;
 
-        if (NavMesh.SamplePosition(target, out NavMeshHit navHit, 1.0f, NavMesh.AllAreas))
+        // UNA SOLA distancia final → evita el doble salto
+        float finalDist = Mathf.Min(mouseDist, ab.dashDistance);
+
+        // Punto final horizontal exacto
+        Vector3 target = transform.position + dir.normalized * finalDist;
+        target.y = transform.position.y;
+
+        // Ajustar navmesh si es necesario
+        if (NavMesh.SamplePosition(target, out NavMeshHit navHit, 1f, NavMesh.AllAreas))
             target = navHit.position;
 
-        agent.isStopped = true;
-        agent.ResetPath();
-
-        transform.DOMove(target, 0.15f)
-            .SetEase(Ease.OutQuad)
-            .OnComplete(() =>
-            {
-                agent.Warp(target);
-                agent.isStopped = false;
-                Debug.Log("[Effects] Dash completado.");
-            });
+        // Teletransporte INSTANT, el único movimiento real
+        agent.Warp(target);
     }
-
     // ─────────── METEORO (R) ───────────
     void CastMeteor()
     {

@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bbccc2fa06d89e4a9f7d0151e5b7daa, type: 3}
   m_Name: Ulti Explosiva
   m_EditorClassIdentifier: 
-  range: 8
+  range: 12
   projectileSpeed: 20
-  explosionRadius: 2
+  explosionRadius: 3
   damageBase: 40
   damagePerLevel: 20
   duration: 3
   dashDistance: 6
-  meteorDelay: 1.5
+  meteorDelay: 1
   meteorRadius: 4
   abilityName: Ulti
-  cooldown: 50
+  cooldown: 2
   maxLevel: 3
   locked: 0

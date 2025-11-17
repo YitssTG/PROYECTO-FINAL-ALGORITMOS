@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -5590238785133456535}
   - component: {fileID: 8697323886695559603}
   - component: {fileID: 6853201630049303262}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: EnemyMelee
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -128,8 +128,6 @@ MonoBehaviour:
   detectionRadius: 20
   attackRadius: 5
   speed: 1
-  separationDistance: 1.5
-  separationForce: 3
 --- !u!114 &-5590238785133456535
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bbccc2fa06d89e4a9f7d0151e5b7daa, type: 3}
   m_Name: BolaDeFuego
   m_EditorClassIdentifier: 
-  range: 8
+  range: 15
   projectileSpeed: 20
   explosionRadius: 2
-  damageBase: 40
-  damagePerLevel: 20
+  damageBase: 1
+  damagePerLevel: 2
   duration: 3
   dashDistance: 6
   meteorDelay: 1.5
-  meteorRadius: 4
+  meteorRadius: 20
   abilityName: Bola de Fuego
-  cooldown: 10
+  cooldown: 2
   maxLevel: 5
   locked: 0

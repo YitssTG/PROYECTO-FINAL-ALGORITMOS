@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1068584381949300312}
   - component: {fileID: -6135586191335005693}
   - component: {fileID: 2609277137613607605}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: EnemyDistance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -195,7 +195,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1629887487801266352}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
