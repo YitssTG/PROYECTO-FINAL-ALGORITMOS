@@ -3,35 +3,21 @@ using UnityEngine.InputSystem;
 
 public class ShopController : MonoBehaviour
 {
-    [Header("Panel de tienda")]
-    public GameObject shopPanel;
-
-    [Header("Referencias de árboles")]
-    public ItemGraphUI attackGraph;
-    public ItemGraphUI defenseGraph;
-    public ItemGraphUI speedGraph;
-
-    private bool isOpen;
-
-    void Start()
+    private void Update()
     {
-        shopPanel.SetActive(false);
+        HandleInput();
     }
 
-    public void OnToggleShop(InputAction.CallbackContext ctx)
+    private void HandleInput()
     {
-        if (!ctx.performed) return;
-
-        isOpen = !isOpen;
-        shopPanel.SetActive(isOpen);
-
-        if (isOpen)
+        if (Keyboard.current.tKey.wasPressedThisFrame)
         {
-            // 🧹 Limpia selección al abrir
-            ItemGraphUI.ActiveGraph = null;
-            if (attackGraph != null) attackGraph.ClearSelection();
-            if (defenseGraph != null) defenseGraph.ClearSelection();
-            if (speedGraph != null) speedGraph.ClearSelection();
+            ToggleShop();
         }
+    }
+
+    private void ToggleShop()
+    {
+        GameManager.Instance?.shopManager?.ToggleShop();
     }
 }

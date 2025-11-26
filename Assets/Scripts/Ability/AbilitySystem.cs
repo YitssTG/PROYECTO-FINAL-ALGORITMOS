@@ -27,12 +27,19 @@ public class AbilitySystem : MonoBehaviour
     public Dictionary<AbilityType, Ability> abilities = new();
     public Dictionary<AbilityType, AbilityState> state = new();
 
+    // Evento centralizado para reemplazar los OnCast individuales
+    public System.Action<AbilityType> OnAbilityCast;
+
     private PlayerStats playerStats;
     private AbilityAimingSystem aimingSystem;
-
     private bool isCtrlPressed = false;
 
     void Start()
+    {
+        Initialize();
+    }
+
+    public void Initialize()
     {
         playerStats = GameManager.Instance?.playerStats;
         aimingSystem = GetComponent<AbilityAimingSystem>();
@@ -60,32 +67,87 @@ public class AbilitySystem : MonoBehaviour
 
             AbilityState st = new AbilityState();
             st.unlocked = !ab.locked;
-            st.level = ab.level;
-
+            st.level = ab.locked ? 0 : 1;
             state[type] = st;
         }
+
+        Debug.Log("✅ AbilitySystem inicializado");
     }
 
+    // Métodos de utilidad para otros sistemas
+    public bool CanCast(AbilityType type)
+    {
+        if (!abilities.ContainsKey(type) || !state.ContainsKey(type))
+            return false;
 
+        Ability ab = abilities[type];
+        AbilityState st = state[type];
+
+        return st.unlocked && st.level > 0 && Time.time >= st.lastCastTime + ab.cooldown;
+    }
+
+    public float GetCooldownRemaining(AbilityType type)
+    {
+        if (!state.ContainsKey(type)) return 0f;
+
+        AbilityState st = state[type];
+        Ability ab = abilities[type];
+
+        float endTime = st.lastCastTime + ab.cooldown;
+        return Mathf.Max(0f, endTime - Time.time);
+    }
+
+    public int GetCalculatedDamage(AbilityType type)
+    {
+        if (!abilities.ContainsKey(type) || !state.ContainsKey(type))
+            return 0;
+
+        Ability ab = abilities[type];
+        AbilityState st = state[type];
+
+        return Mathf.RoundToInt(ab.damageBase + ab.damagePerLevel * st.level);
+    }
+
+    public bool IsAbilityReady(AbilityType type)
+    {
+        return CanCast(type);
+    }
+
+    public Ability GetAbility(AbilityType type)
+    {
+        return abilities.ContainsKey(type) ? abilities[type] : null;
+    }
+
+    public bool CanUpgradeAbility(AbilityType type, int playerLevel, int availableSkillPoints)
+    {
+        if (!abilities.ContainsKey(type)) return false;
+
+        Ability ab = abilities[type];
+        AbilityState st = state[type];
+
+        if (availableSkillPoints <= 0) return false;
+        if (st.level >= ab.maxLevel) return false;
+
+        if (type == AbilityType.Ultimate && playerLevel < 5) return false;
+
+        return true;
+    }
+
+    // Sistema de input
     private bool IsAiming()
     {
         return aimingSystem != null && aimingSystem.IsAiming;
     }
 
-    // ---------------- CTRL PARA MEJORAS ----------------
     public void OnCtrlPressed(InputAction.CallbackContext ctx)
     {
         if (ctx.performed) isCtrlPressed = true;
         if (ctx.canceled) isCtrlPressed = false;
     }
 
-    // ---------------- BLOQUE DE CASTEO NORMAL ----------------
     public void OnAbilityQ(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed &&
-            !isCtrlPressed &&
-            !Keyboard.current.shiftKey.isPressed &&
-            !IsAiming())
+        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
         {
             TryCast(AbilityType.PrimaryAb);
         }
@@ -93,10 +155,7 @@ public class AbilitySystem : MonoBehaviour
 
     public void OnAbilityW(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed &&
-            !isCtrlPressed &&
-            !Keyboard.current.shiftKey.isPressed &&
-            !IsAiming())
+        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
         {
             TryCast(AbilityType.SecondaryAb);
         }
@@ -104,10 +163,7 @@ public class AbilitySystem : MonoBehaviour
 
     public void OnAbilityE(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed &&
-            !isCtrlPressed &&
-            !Keyboard.current.shiftKey.isPressed &&
-            !IsAiming())
+        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
         {
             TryCast(AbilityType.ThirdAb);
         }
@@ -115,16 +171,12 @@ public class AbilitySystem : MonoBehaviour
 
     public void OnAbilityR(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed &&
-            !isCtrlPressed &&
-            !Keyboard.current.shiftKey.isPressed &&
-            !IsAiming())
+        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
         {
             TryCast(AbilityType.Ultimate);
         }
     }
 
-    // ---------------- BLOQUE DE MEJORA ----------------
     public void OnUpgradeQ(InputAction.CallbackContext ctx)
     {
         if (ctx.performed && isCtrlPressed)
@@ -149,7 +201,6 @@ public class AbilitySystem : MonoBehaviour
             playerStats?.SpendSkillPoint(AbilityType.Ultimate);
     }
 
-    // ---------------- LANZAR HABILIDAD ----------------
     public bool TryCast(AbilityType type)
     {
         if (!abilities.ContainsKey(type))
@@ -158,27 +209,19 @@ public class AbilitySystem : MonoBehaviour
         Ability ab = abilities[type];
         AbilityState st = state[type];
 
-        // no desbloqueada
         if (!st.unlocked || st.level <= 0)
             return false;
 
-        // ▶️ usar cooldown del ScriptableObject (NO del state)
-        if (!ab.CanCast())
+        if (!CanCast(type))
             return false;
 
-        // actualizar nivel real
-        ab.level = st.level;
-
-        // ▶️ lanzar habilidad y activar cooldown interno
-        ab.Cast();
-
-        // si deseas registrar aquí también (opcional)
         st.lastCastTime = Time.time;
+        OnAbilityCast?.Invoke(type);
 
+        Debug.Log($"[{ab.abilityName}] lanzada (Nivel {st.level})");
         return true;
     }
 
-    // ---------------- MEJORAR HABILIDADES ----------------
     public bool TryUpgradeAbility(AbilityType type, int playerLevel)
     {
         if (!abilities.ContainsKey(type)) return false;
@@ -186,34 +229,27 @@ public class AbilitySystem : MonoBehaviour
         Ability ab = abilities[type];
         AbilityState st = state[type];
 
-        // Regla: Ulti exige nivel base 5
         if (type == AbilityType.Ultimate && playerLevel < 5)
         {
             Debug.Log("[Mejora] Ultimate bloqueada hasta nivel 5 del jugador.");
             return false;
         }
 
-        // Primer desbloqueo
         if (!st.unlocked)
         {
             st.unlocked = true;
             st.level = 1;
-            ab.level = 1;
             Debug.Log($"[{ab.abilityName}] Desbloqueada (nivel 1)");
             return true;
         }
 
-        // Ya está al máximo
         if (st.level >= ab.maxLevel)
         {
             Debug.Log($"[{ab.abilityName}] nivel máximo alcanzado.");
             return false;
         }
 
-        // Subir nivel
         st.level++;
-        ab.level = st.level;
-
         Debug.Log($"[{ab.abilityName}] mejorada a nivel {st.level}");
         return true;
     }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class ItemGraphUI : MonoBehaviour
 {
@@ -9,101 +8,93 @@ public class ItemGraphUI : MonoBehaviour
     public GameObject nodePrefab;
     public RectTransform container;
 
-    [Header("Panel de información (compartido)")]
-    public TMP_Text infoText;
-    public Button buyButton;
-    public Button undoButton;
-
-    [Header("Datos del árbol")]
-    public List<ItemData> allItems = new List<ItemData>();
-
-    [Header("Referencias externas")]
-    public GoldManager goldManager;
-    public InventoryManager inventory;
-
     [Header("Espaciado visual")]
     public float xSpacing = 180f;
     public float ySpacing = 200f;
 
-    [HideInInspector] public readonly Dictionary<ItemData, ItemNodeUI> nodeLookup = new();
-    private readonly List<ItemData> purchaseHistory = new();
-    private ItemData selectedItem;
+    [Header("Tipo de gráfico")]
+    public string graphType; // "Attack", "Defense", "Speed"
 
-    private bool initialized = false;
+    public Dictionary<ItemData, ItemNodeUI> nodeLookup { get; private set; } = new Dictionary<ItemData, ItemNodeUI>();
 
-    // 🧩 Aquí conectamos con tus estructuras
-    private OrientedGraph<ItemData> graph = new OrientedGraph<ItemData>();
-    private Dictionary<ItemData, Node<ItemData>> graphNodes = new();
+    private List<ItemData> itemsToDisplay = new List<ItemData>();
 
-    public static ItemGraphUI ActiveGraph;
+    // Propiedad estática corregida
+    public static ItemGraphUI ActiveGraph { get; set; }
 
-    private void OnEnable()
+    private void Start()
     {
-        if (!initialized)
-        {
-            ResetItemsState(); // Solo la primera vez
-            initialized = true;
-        }
-
-        BuildGraph();
-        ArrangeTreeLayout();
-        UpdateUnlocks();
-
-        if (buyButton != null)
-        {
-            buyButton.onClick.RemoveAllListeners();
-            buyButton.onClick.AddListener(() => ActiveGraph?.ConfirmPurchase());
-        }
-
-        if (undoButton != null)
-        {
-            undoButton.onClick.RemoveAllListeners();
-            undoButton.onClick.AddListener(() => ActiveGraph?.UndoPurchase());
-        }
-
-        // 🧠 Solo para probar que se usa tu grafo real
-        graph.PrintAdjacencyList();
-        GetComponentInChildren<UIConnectionDrawer>()?.DrawConnections();
+        RefreshGraph();
     }
 
-    private void BuildGraph()
+    public void RefreshGraph()
     {
-        if (container == null || nodePrefab == null) return;
-        foreach (Transform t in container)
-            Destroy(t.gameObject);
+        // Limpiar contenedor
+        if (container != null)
+        {
+            foreach (Transform child in container)
+                Destroy(child.gameObject);
+        }
 
         nodeLookup.Clear();
-        graphNodes.Clear();
-        graph = new OrientedGraph<ItemData>();
+        itemsToDisplay.Clear();
 
-        // 🟢 1. Creamos un nodo del grafo para cada ítem
-        foreach (var item in allItems)
+        // Obtener items del tipo correspondiente
+        if (ItemManager.Instance != null)
         {
-            var node = graph.AddNode(item);
-            graphNodes[item] = node;
-
-            GameObject go = Instantiate(nodePrefab, container);
-            ItemNodeUI ui = go.GetComponent<ItemNodeUI>();
-            ui.Initialize(item, this);
-            nodeLookup[item] = ui;
-        }
-
-        // 🟢 2. Creamos las conexiones según los requiredItems
-        foreach (var item in allItems)
-        {
-            if (item.requiredItems == null) continue;
-
-            foreach (var req in item.requiredItems)
+            foreach (var item in ItemManager.Instance.allItems)
             {
-                if (graphNodes.ContainsKey(req) && graphNodes.ContainsKey(item))
-                    graph.AddEdge(graphNodes[req], graphNodes[item]);
+                // Filtrar por tipo de gráfico basado en los bonos
+                if (ShouldDisplayInThisGraph(item))
+                {
+                    itemsToDisplay.Add(item);
+                }
             }
         }
+
+        // Construir gráfico visual
+        BuildVisualGraph();
+    }
+
+    private bool ShouldDisplayInThisGraph(ItemData item)
+    {
+        if (string.IsNullOrEmpty(graphType)) return true;
+
+        return graphType.ToLower() switch
+        {
+            "attack" => item.bonusDamage > 0,
+            "defense" => item.bonusArmor > 0,
+            "speed" => item.bonusSpeed > 0,
+            _ => true
+        };
+    }
+
+    private void BuildVisualGraph()
+    {
+        if (nodePrefab == null || container == null) return;
+
+        // Crear nodos visuales
+        foreach (var item in itemsToDisplay)
+        {
+            GameObject nodeGO = Instantiate(nodePrefab, container);
+            ItemNodeUI nodeUI = nodeGO.GetComponent<ItemNodeUI>();
+            if (nodeUI != null)
+            {
+                nodeUI.Initialize(item, this);
+                nodeLookup[item] = nodeUI;
+            }
+        }
+
+        // Posicionar nodos
+        ArrangeTreeLayout();
     }
 
     private void ArrangeTreeLayout()
     {
-        List<ItemData> roots = allItems.FindAll(i => i.requiredItems == null || i.requiredItems.Length == 0);
+        // Encontrar raíces (items sin requerimientos)
+        List<ItemData> roots = itemsToDisplay.FindAll(i =>
+            i.requiredItems == null || i.requiredItems.Length == 0);
+
         float startX = -((roots.Count - 1) * xSpacing / 2);
         for (int i = 0; i < roots.Count; i++)
         {
@@ -116,113 +107,61 @@ public class ItemGraphUI : MonoBehaviour
         if (!nodeLookup.ContainsKey(item)) return;
 
         RectTransform rt = nodeLookup[item].GetComponent<RectTransform>();
-        rt.anchoredPosition = pos;
+        if (rt != null)
+            rt.anchoredPosition = pos;
 
-        // 🧩 Usamos el grafo real para obtener los hijos
-        if (!graphNodes.ContainsKey(item)) return;
-        var node = graphNodes[item];
-
-        // 🟢 Lista de hijos
-        List<Node<ItemData>> children = node.Neighbors;
+        // Encontrar hijos
+        var children = GetChildren(item);
         if (children.Count == 0) return;
 
-        // 🔹 Calcular separación horizontal
         float totalWidth = (children.Count - 1) * xSpacing;
         float startX = pos.x - totalWidth / 2;
 
-        // 🔹 Repartir los hijos horizontalmente
         for (int i = 0; i < children.Count; i++)
         {
-            ItemData child = children[i].Value;
             float childX = startX + i * xSpacing;
             float childY = pos.y - ySpacing;
-
-            PositionRecursive(child, new Vector2(childX, childY), depth + 1);
+            PositionRecursive(children[i], new Vector2(childX, childY), depth + 1);
         }
     }
 
-    public void SelectItem(ItemData item)
+    private List<ItemData> GetChildren(ItemData parent)
     {
-        selectedItem = item;
-        ActiveGraph = this;
+        List<ItemData> children = new List<ItemData>();
 
-        if (infoText != null)
-            infoText.text = $"{item.itemName}\nCosto: {item.cost}\n\n{item.description}";
-    }
-
-    private void ConfirmPurchase()
-    {
-        if (selectedItem == null || selectedItem.isPurchased || !selectedItem.isUnlocked) return;
-
-        if (!goldManager.SpendGold(selectedItem.cost))
+        foreach (var item in itemsToDisplay)
         {
-            if (infoText != null)
-                infoText.text = "❌ No tienes suficiente oro.";
-            return;
-        }
-
-        selectedItem.isPurchased = true;
-        purchaseHistory.Add(selectedItem);
-        inventory.AddItem(selectedItem);
-        GameManager.Instance.playerStats.ApplyItemStats(selectedItem);
-        UpdateUnlocks();
-
-        if (infoText != null)
-            infoText.text = $"✅ Compraste {selectedItem.itemName}";
-    }
-
-    private void UndoPurchase()
-    {
-        if (purchaseHistory.Count == 0) return;
-
-        ItemData last = purchaseHistory[^1];
-        purchaseHistory.RemoveAt(purchaseHistory.Count - 1);
-        last.isPurchased = false;
-
-        GameManager.Instance.playerStats.RemoveItemStats(last);
-
-        goldManager.AddGold(last.cost);
-        inventory.RemoveItem(last);
-        UpdateUnlocks();
-
-        if (infoText != null)
-            infoText.text = $"↩️ Revertiste {last.itemName}";
-    }
-
-    private void UpdateUnlocks()
-    {
-        foreach (var item in allItems)
-        {
-            if (item.requiredItems == null || item.requiredItems.Length == 0)
-                item.isUnlocked = true;
-            else
+            if (item.requiredItems != null)
             {
-                bool unlocked = true;
                 foreach (var req in item.requiredItems)
-                    if (!req.isPurchased) unlocked = false;
-                item.isUnlocked = unlocked;
+                {
+                    if (req == parent)
+                    {
+                        children.Add(item);
+                        break;
+                    }
+                }
             }
-
-            if (nodeLookup.ContainsKey(item))
-                nodeLookup[item].UpdateState();
         }
-        GetComponentInChildren<UIConnectionDrawer>()?.DrawConnections();
 
+        return children;
     }
 
-    private void ResetItemsState()
+    public void OnItemSelected(ItemData item)
     {
-        foreach (var item in allItems)
+        // Buscar ShopUI en lugar de usar Instance
+        ShopUI shopUI = FindObjectOfType<ShopUI>();
+        if (shopUI != null)
         {
-            item.isUnlocked = false;
-            item.isPurchased = false;
+            shopUI.SelectItem(item);
         }
     }
 
     public void ClearSelection()
     {
-        selectedItem = null;
-        if (infoText != null)
-            infoText.text = "Selecciona un ítem para ver detalles.";
+        foreach (var node in nodeLookup.Values)
+        {
+            node.SetSelected(false);
+        }
     }
 }

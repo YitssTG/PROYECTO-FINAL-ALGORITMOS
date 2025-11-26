@@ -6421,23 +6421,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 176317527642021625, guid: 75bb838da42da6d41afdcce157f7f1d6, type: 3}
   container: {fileID: 971665171}
-  infoText: {fileID: 1309237389}
-  buyButton: {fileID: 2035923703}
-  undoButton: {fileID: 416668668}
-  allItems:
-  - {fileID: 11400000, guid: a3cf362c1114e824b904506bd6422d5e, type: 2}
-  - {fileID: 11400000, guid: c12bae0ec6f574046b0afc9e0c71178c, type: 2}
-  - {fileID: 11400000, guid: 1166214b0d21e0143bc498f1691b5859, type: 2}
-  - {fileID: 11400000, guid: c782f458945a43f44ab05bacb2a7dbf7, type: 2}
-  - {fileID: 11400000, guid: facef696b9632df4eb4fd3f8c821eb4e, type: 2}
-  - {fileID: 11400000, guid: cc19a75201cb4f342b99aa12e064d92a, type: 2}
-  - {fileID: 11400000, guid: 180805624cca14f4e8e4cd35ba679afa, type: 2}
-  - {fileID: 11400000, guid: f52ccb100235d6246b19eb772ed7bf37, type: 2}
-  - {fileID: 11400000, guid: f486926ee1c48844a9f5df755500af51, type: 2}
-  goldManager: {fileID: 1981366285}
-  inventory: {fileID: 331521912}
   xSpacing: 200
   ySpacing: 160
+  graphType: 
 --- !u!1001 &223807279
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6600,6 +6586,10 @@ GameObject:
   m_Component:
   - component: {fileID: 235780463}
   - component: {fileID: 235780462}
+  - component: {fileID: 235780467}
+  - component: {fileID: 235780466}
+  - component: {fileID: 235780465}
+  - component: {fileID: 235780464}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6624,9 +6614,18 @@ MonoBehaviour:
   abilitySystem: {fileID: 2019222672}
   playerStats: {fileID: 2019222671}
   spawners: []
+  goldManager: {fileID: 235780464}
+  waveManager: {fileID: 1509574252}
   enemigosDerrotados: 0
   monedasTotales: 0
-  goldManager: {fileID: 1981366285}
+  abilityManager: {fileID: 242493611}
+  shopManager: {fileID: 235780467}
+  itemManager: {fileID: 235780466}
+  inventoryManager: {fileID: 235780465}
+  shopUI: {fileID: 1978643198}
+  attackGraphUI: {fileID: 1006613281}
+  defenseGraphUI: {fileID: 1543180755}
+  speedGraphUI: {fileID: 223405258}
 --- !u!4 &235780463
 Transform:
   m_ObjectHideFlags: 0
@@ -6642,6 +6641,86 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &235780464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235780461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7821f78e1852f8247aa9d79d92087670, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentGold: 800
+  maxGold: 1000
+  goldText: {fileID: 122434324}
+  OnGoldChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGoldAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGoldSpent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &235780465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235780461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8266c27b89d32e24bbc3dcb97cafa405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryContainer: {fileID: 715405763}
+  itemNodePrefab: {fileID: 176317527642021625, guid: 75bb838da42da6d41afdcce157f7f1d6, type: 3}
+--- !u!114 &235780466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235780461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fab4c4363a8fc614c8401ea4d653124f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allItems:
+  - {fileID: 11400000, guid: 67d02e80adeb42b4ca2c4da887a2086a, type: 2}
+  - {fileID: 11400000, guid: 73f4b00c17fc5e842a33802bcf7de441, type: 2}
+  - {fileID: 11400000, guid: da8c5c78d5e8c1349b1bdd57a23d2478, type: 2}
+  - {fileID: 11400000, guid: 3c1b8e67401df3146819b09b27215897, type: 2}
+  - {fileID: 11400000, guid: 74aab311e867492428d9b1ab6d5bf37e, type: 2}
+  - {fileID: 11400000, guid: 9affc74e89f83e641aad00e6fcec850e, type: 2}
+  - {fileID: 11400000, guid: d1e4d6d0d54a52946af82debd7801d62, type: 2}
+  - {fileID: 11400000, guid: c1f10f2c8f3394049b0104482d35b0ba, type: 2}
+  - {fileID: 11400000, guid: 4294362b82e82df45b32c74779aba31b, type: 2}
+  - {fileID: 11400000, guid: d9430a4bd6a4aa74ab25b2c4b921fd0d, type: 2}
+  - {fileID: 11400000, guid: 07a7bc0870d87d34abd4660332e97004, type: 2}
+  - {fileID: 11400000, guid: 1d89e039a488dea439da7968a0b32260, type: 2}
+--- !u!114 &235780467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235780461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7561421c34c373c4a900ba2acc864146, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemManager: {fileID: 235780466}
+  goldManager: {fileID: 235780464}
+  inventoryManager: {fileID: 235780465}
+  playerStats: {fileID: 2019222671}
+  shopUI: {fileID: 1978643198}
 --- !u!1 &237219139
 GameObject:
   m_ObjectHideFlags: 0
@@ -6763,6 +6842,54 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8556b7f0914079e4e9b306b29bc2498c, type: 3}
+--- !u!1 &242493610
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 242493612}
+  - component: {fileID: 242493611}
+  m_Layer: 0
+  m_Name: AbiltyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &242493611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 242493610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d482068898b648d408d0c9324352a9d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityDatabase: {fileID: 11400000, guid: 8ca2896d9c7b68448a52606036576ab9, type: 2}
+  abilitySystem: {fileID: 2019222672}
+  aimingSystem: {fileID: 2019222677}
+  effectsController: {fileID: 2019222675}
+--- !u!4 &242493612
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 242493610}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 55.95133, y: 7.2977085, z: -227.06572}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &242760297
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9219,7 +9346,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 331521910}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8266c27b89d32e24bbc3dcb97cafa405, type: 3}
   m_Name: 
@@ -28394,23 +28521,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 176317527642021625, guid: 75bb838da42da6d41afdcce157f7f1d6, type: 3}
   container: {fileID: 830699332}
-  infoText: {fileID: 1309237389}
-  buyButton: {fileID: 2035923703}
-  undoButton: {fileID: 416668668}
-  allItems:
-  - {fileID: 11400000, guid: 67d02e80adeb42b4ca2c4da887a2086a, type: 2}
-  - {fileID: 11400000, guid: 73f4b00c17fc5e842a33802bcf7de441, type: 2}
-  - {fileID: 11400000, guid: da8c5c78d5e8c1349b1bdd57a23d2478, type: 2}
-  - {fileID: 11400000, guid: 3c1b8e67401df3146819b09b27215897, type: 2}
-  - {fileID: 11400000, guid: 74aab311e867492428d9b1ab6d5bf37e, type: 2}
-  - {fileID: 11400000, guid: 9affc74e89f83e641aad00e6fcec850e, type: 2}
-  - {fileID: 11400000, guid: d1e4d6d0d54a52946af82debd7801d62, type: 2}
-  - {fileID: 11400000, guid: c1f10f2c8f3394049b0104482d35b0ba, type: 2}
-  - {fileID: 11400000, guid: 4294362b82e82df45b32c74779aba31b, type: 2}
-  goldManager: {fileID: 1981366285}
-  inventory: {fileID: 331521912}
   xSpacing: 200
   ySpacing: 160
+  graphType: 
 --- !u!1001 &1006823554
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30294,7 +30407,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 901361fb435cc1b468e7ed8a222088f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graphUI: {fileID: 1006613281}
   linePrefab: {fileID: 577235330869819629, guid: 92c868c68a1250e428ac425b07c6a7dd, type: 3}
 --- !u!1001 &1088485222
 PrefabInstance:
@@ -32317,7 +32429,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 901361fb435cc1b468e7ed8a222088f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graphUI: {fileID: 223405258}
   linePrefab: {fileID: 577235330869819629, guid: 92c868c68a1250e428ac425b07c6a7dd, type: 3}
 --- !u!1001 &1155683307
 PrefabInstance:
@@ -35823,7 +35934,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 901361fb435cc1b468e7ed8a222088f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graphUI: {fileID: 1543180755}
   linePrefab: {fileID: 577235330869819629, guid: 92c868c68a1250e428ac425b07c6a7dd, type: 3}
 --- !u!1001 &1296399169
 PrefabInstance:
@@ -41093,8 +41203,8 @@ MonoBehaviour:
   goldText: {fileID: 122434324}
   healthText: {fileID: 0}
   experienceText: {fileID: 0}
-  goldManager: {fileID: 1981366285}
-  playerStats: {fileID: 2019222671}
+  enemiesDefeatedText: {fileID: 0}
+  levelText: {fileID: 0}
 --- !u!4 &1519128659
 Transform:
   m_ObjectHideFlags: 0
@@ -41831,23 +41941,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 176317527642021625, guid: 75bb838da42da6d41afdcce157f7f1d6, type: 3}
   container: {fileID: 140034258}
-  infoText: {fileID: 1309237389}
-  buyButton: {fileID: 2035923703}
-  undoButton: {fileID: 416668668}
-  allItems:
-  - {fileID: 11400000, guid: d9430a4bd6a4aa74ab25b2c4b921fd0d, type: 2}
-  - {fileID: 11400000, guid: 07a7bc0870d87d34abd4660332e97004, type: 2}
-  - {fileID: 11400000, guid: 1d89e039a488dea439da7968a0b32260, type: 2}
-  - {fileID: 11400000, guid: 401e390f95cdcf646a3ed93b13573370, type: 2}
-  - {fileID: 11400000, guid: 77f5418ddccdcc54c9b666b5f9079f6b, type: 2}
-  - {fileID: 11400000, guid: 366b36567f79c7048bbe33e4095bfc4b, type: 2}
-  - {fileID: 11400000, guid: d49b199de3cb9c244bb6ab980bade045, type: 2}
-  - {fileID: 11400000, guid: c39e6b4c9b0e4d746bfb2ec7daab2cba, type: 2}
-  - {fileID: 11400000, guid: 30b1dd6ff84da394fae4184e7a0cca4b, type: 2}
-  goldManager: {fileID: 1981366285}
-  inventory: {fileID: 331521912}
   xSpacing: 200
   ySpacing: 160
+  graphType: 
 --- !u!1001 &1543590296
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52850,7 +52946,7 @@ MonoBehaviour:
     m_ActionName: 'Player/Crtl[/Keyboard/ctrl]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1978643195}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ShopController, Assembly-CSharp
         m_MethodName: OnToggleShop
         m_Mode: 0
@@ -54356,14 +54452,14 @@ GameObject:
   - component: {fileID: 1978643194}
   - component: {fileID: 1978643197}
   - component: {fileID: 1978643196}
-  - component: {fileID: 1978643195}
+  - component: {fileID: 1978643198}
   m_Layer: 5
   m_Name: ShopPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1978643194
 RectTransform:
   m_ObjectHideFlags: 0
@@ -54388,22 +54484,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1978643195
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1978643193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bced71aa356769648ab17bbb03caca60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  shopPanel: {fileID: 1978643193}
-  attackGraph: {fileID: 1006613281}
-  defenseGraph: {fileID: 1543180755}
-  speedGraph: {fileID: 223405258}
 --- !u!114 &1978643196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54442,6 +54522,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1978643193}
   m_CullTransparentMesh: 1
+--- !u!114 &1978643198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1978643193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3765bfae38a925c4f940ff161ad6c958, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shopPanel: {fileID: 1978643193}
+  infoText: {fileID: 1309237389}
+  buyButton: {fileID: 2035923703}
+  undoButton: {fileID: 416668668}
+  closeButton: {fileID: 0}
+  attackGraphUI: {fileID: 1006613281}
+  defenseGraphUI: {fileID: 1543180755}
+  speedGraphUI: {fileID: 223405258}
+  goldText: {fileID: 122434324}
+  shopManager: {fileID: 235780467}
+  itemManager: {fileID: 235780466}
+  goldManager: {fileID: 235780464}
 --- !u!1001 &1978649185
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54632,55 +54736,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7427789219128749590, guid: 34ec567b593fde540a5b5581732884e5, type: 3}
   m_PrefabInstance: {fileID: 1986775487}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1981366284
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1981366286}
-  - component: {fileID: 1981366285}
-  m_Layer: 0
-  m_Name: GoldManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1981366285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1981366284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7821f78e1852f8247aa9d79d92087670, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startingGold: 500
-  currentGold: 0
-  OnGoldChanged:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!4 &1981366286
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1981366284}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1981882626 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7427789219128749590, guid: 34ec567b593fde540a5b5581732884e5, type: 3}
@@ -56012,9 +56067,9 @@ GameObject:
   - component: {fileID: 2019222672}
   - component: {fileID: 2019222673}
   - component: {fileID: 2019222674}
-  - component: {fileID: 2019222676}
   - component: {fileID: 2019222675}
   - component: {fileID: 2019222677}
+  - component: {fileID: 2019222678}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -56168,9 +56223,9 @@ MonoBehaviour:
   experience: 0
   experienceToNext: 50
   skillPoints: 1
-  damage: 10
-  speed: 4
-  armor: 0
+  baseDamage: 10
+  baseSpeed: 5
+  baseArmor: 0
   maxHealth: 100
   currentHealth: 0
   isInvulnerable: 0
@@ -56178,6 +56233,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnExperienceChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLevelChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &2019222672
@@ -56253,18 +56311,6 @@ MonoBehaviour:
   fireballPrefab: {fileID: 8742042112951014058, guid: 362e92ab74c06974f856e56fb03a4352, type: 3}
   auraPrefab: {fileID: 6243770121933767762, guid: 87f8dbe6c63a4e44196424ae87bbe10e, type: 3}
   meteorPrefab: {fileID: 1774811553432889312, guid: 645677e30866169429c231d6e0ce5a97, type: 3}
---- !u!114 &2019222676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2019222662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37f3ae278dc5d7044a4b1ae6dab2e519, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2019222677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56291,6 +56337,18 @@ MonoBehaviour:
   rImpactMultiplier: 1
   qForwardOffset: 8
   indicatorsY: 0.05
+--- !u!114 &2019222678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019222662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bced71aa356769648ab17bbb03caca60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &2021493141 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 488878, guid: 0c8b53b4a2c2a624d8f344f282d709aa, type: 3}
@@ -59328,7 +59386,6 @@ SceneRoots:
   - {fileID: 1914247873}
   - {fileID: 235780463}
   - {fileID: 1519128659}
-  - {fileID: 1981366286}
   - {fileID: 1509574253}
   - {fileID: 983406976}
   - {fileID: 1933470514}
@@ -59353,3 +59410,4 @@ SceneRoots:
   - {fileID: 340690423}
   - {fileID: 1202140359}
   - {fileID: 382129416}
+  - {fileID: 242493612}

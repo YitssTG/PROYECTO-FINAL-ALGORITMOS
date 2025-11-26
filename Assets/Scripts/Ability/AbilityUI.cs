@@ -11,90 +11,112 @@ public class AbilityUI : MonoBehaviour
     public TextMeshProUGUI levelText;
 
     [Header("Cooldown UI")]
-    public GameObject cooldownMask;      // Panel negro encima del icono
-    public Image cooldownFill;           // Cuadrado negro con Fill
-    public TextMeshProUGUI cooldownText; // Segundos
+    public GameObject cooldownMask;
+    public Image cooldownFill;
+    public TextMeshProUGUI cooldownText;
 
     public float waitTimeout = 5f;
 
-    private GameManager gm;
-    private PlayerStats playerStats;
-    private Ability abilityRef;
+    private Ability currentAbility;
 
     IEnumerator Start()
     {
+        Debug.Log($"🔧 AbilityUI {abilityKey} iniciando...");
         float timer = 0f;
 
-        // ESPERAR A QUE SE INICIALICEN LOS SISTEMAS
-        while ((GameManager.Instance == null ||
-                GameManager.Instance.abilitySystem == null ||
-                !GameManager.Instance.abilitySystem.abilities.ContainsKey(abilityKey) ||
-                GameManager.Instance.playerStats == null)
-               && timer < waitTimeout)
+        // Esperar a que los managers estén listos
+        while ((AbilityManager.Instance == null || !AbilityManager.Instance.IsReady()) && timer < waitTimeout)
         {
             timer += Time.deltaTime;
             yield return null;
         }
 
-        gm = GameManager.Instance;
-        playerStats = gm.playerStats;
-        abilityRef = gm.abilitySystem.abilities[abilityKey];
+        if (AbilityManager.Instance == null)
+        {
+            Debug.LogError("❌ AbilityManager no disponible en AbilityUI");
+            yield break;
+        }
 
-        // 🔹 COOLdown UI inicia apagado SIEMPRE
+        if (!AbilityManager.Instance.IsReady())
+        {
+            Debug.LogError("❌ AbilityManager no está listo");
+            yield break;
+        }
+
+        currentAbility = AbilityManager.Instance.GetAbility(abilityKey);
+        if (currentAbility == null)
+        {
+            Debug.LogError($"❌ No se pudo obtener la habilidad {abilityKey} desde AbilityManager");
+            yield break;
+        }
+
         if (cooldownMask != null)
             cooldownMask.SetActive(false);
 
-        // BOTÓN DE UPGRADE CONFIG
-        upgradeButton.onClick.RemoveAllListeners();
-        upgradeButton.onClick.AddListener(OnUpgradeClicked);
+        if (upgradeButton != null)
+        {
+            upgradeButton.onClick.RemoveAllListeners();
+            upgradeButton.onClick.AddListener(OnUpgradeClicked);
+        }
 
         UpdateUI();
+        Debug.Log($"✅ AbilityUI {abilityKey} inicializado correctamente");
     }
 
     void Update()
     {
-        if (abilityRef == null) return;
+        if (currentAbility == null) return;
+
+        // Actualizar UI constantemente para mostrar cambios en tiempo real
         UpdateUI();
     }
 
     private void UpdateUI()
     {
-        if (abilityRef == null) return;
+        if (currentAbility == null) return;
 
-        // ---------- SISTEMA DE UPGRADE ----------
-        bool hasPoints = playerStats.skillPoints > 0;
-        bool notMax = abilityRef.level < abilityRef.maxLevel;
-        bool canUpgrade = hasPoints && notMax;
+        // Actualizar nivel
+        int abilityLevel = AbilityManager.Instance.GetAbilityLevel(abilityKey);
+        if (levelText != null)
+            levelText.text = "Lv " + abilityLevel.ToString();
 
-        if (abilityKey == AbilityType.Ultimate && playerStats.playerLevel < 5)
-            canUpgrade = false;
+        // Actualizar botón de upgrade
+        if (upgradeButton != null)
+        {
+            bool canUpgrade = AbilityManager.Instance.CanUpgradeAbility(abilityKey);
+            upgradeButton.gameObject.SetActive(canUpgrade);
 
-        upgradeButton.gameObject.SetActive(canUpgrade);
-        levelText.text = "Lv " + abilityRef.level.ToString();
+            if (canUpgrade)
+            {
+                Debug.Log($"🔧 Botón {abilityKey} MOSTRADO - Se puede mejorar");
+            }
+        }
 
-        // ---------- COOLDOWN VISUAL ----------
-        float remaining = abilityRef.GetCooldownRemaining();
-        bool onCooldown = remaining > 0.05f;  // evita activar por errores de precisión
+        UpdateCooldownVisual();
+    }
+
+    private void UpdateCooldownVisual()
+    {
+        if (currentAbility == null || cooldownMask == null) return;
+
+        float remaining = AbilityManager.Instance.GetCooldownRemaining(abilityKey);
+        bool onCooldown = remaining > 0.05f;
 
         if (onCooldown)
         {
-            // ACTIVAR MÁSCARA (si no está ya activa)
             if (!cooldownMask.activeSelf)
                 cooldownMask.SetActive(true);
 
-            // TEXTO DE SEGUNDOS RESTANTES
             if (cooldownText != null)
                 cooldownText.text = Mathf.Ceil(remaining).ToString();
 
-            // FILL DEL CUADRADO (0 a 1)
-            if (cooldownFill != null && abilityRef.cooldown > 0f)
+            if (cooldownFill != null && currentAbility.cooldown > 0f)
             {
-                cooldownFill.fillAmount = remaining / abilityRef.cooldown;
+                cooldownFill.fillAmount = remaining / currentAbility.cooldown;
             }
         }
         else
         {
-            // SI YA ACABÓ EL COOLDOWN, OCULTAR LA MÁSCARA
             if (cooldownMask.activeSelf)
                 cooldownMask.SetActive(false);
         }
@@ -102,10 +124,8 @@ public class AbilityUI : MonoBehaviour
 
     private void OnUpgradeClicked()
     {
-        bool upgraded = playerStats.SpendSkillPoint(abilityKey);
-        if (upgraded)
-            Debug.Log($"Habilidad {abilityKey} mejorada.");
-
-        UpdateUI();
+        Debug.Log($"🔧 Botón de upgrade clickeado para {abilityKey}");
+        AbilityManager.Instance.UpgradeAbility(abilityKey);
+        // La UI se actualizará automáticamente en el próximo Update
     }
 }

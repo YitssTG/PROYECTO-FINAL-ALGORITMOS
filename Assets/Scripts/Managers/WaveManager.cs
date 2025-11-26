@@ -4,8 +4,6 @@ using TMPro;
 
 public class WaveManager : MonoBehaviour
 {
-    public static WaveManager Instance;
-
     [Header("Tiempos de fases")]
     public float preparationTime = 15f;
     public float waveDuration = 60f;
@@ -29,15 +27,13 @@ public class WaveManager : MonoBehaviour
     private float timer;
     private int currentWave = 0;
 
-    void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
-
     void Start()
     {
-        StartCoroutine(WaveRoutine());
+        // ✅ CORREGIDO: Inicializar a través de GameManager
+        if (GameManager.Instance != null)
+        {
+            StartCoroutine(WaveRoutine());
+        }
     }
 
     IEnumerator WaveRoutine()
@@ -72,10 +68,6 @@ public class WaveManager : MonoBehaviour
 
             SetSpawnersActive(true);
 
-            // Mini Jefe desactivado por ahora
-            // if (miniJefePrefab != null && DebeAparecerMiniJefe(currentWave))
-            //     SpawnMiniJefe();
-
             timer = waveDuration;
             while (timer > 0)
             {
@@ -88,12 +80,6 @@ public class WaveManager : MonoBehaviour
             Debug.Log($"Oleada {currentWave} finalizada");
             SetSpawnersActive(false);
         }
-    }
-
-    private bool DebeAparecerMiniJefe(int wave)
-    {
-        if (wave < oleadaMiniJefe) return false;
-        return (wave - oleadaMiniJefe) % frecuenciaMiniJefe == 0;
     }
 
     private void SetSpawnersActive(bool active)

@@ -44,9 +44,9 @@ public class PlayerAutoAttack : MonoBehaviour
         {
             nextAttackTime = Time.time + attackCooldown;
 
-            // daño al enemigo
-            currentTarget.TakeDamage(Mathf.RoundToInt(stats.damage));
-            Debug.Log($"ATACASTE → {currentTarget.enemyName} por {stats.damage} daño");
+            // ✅ CORREGIDO: Usar CurrentDamage en lugar de damage
+            currentTarget.TakeDamage(Mathf.RoundToInt(stats.CurrentDamage));
+            Debug.Log($"ATACASTE → {currentTarget.enemyName} por {stats.CurrentDamage} daño");
         }
     }
 

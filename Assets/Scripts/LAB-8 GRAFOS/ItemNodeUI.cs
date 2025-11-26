@@ -5,50 +5,72 @@ using UnityEngine.EventSystems;
 
 public class ItemNodeUI : MonoBehaviour, IPointerClickHandler
 {
+    [Header("Componentes UI")]
     public Image icon;
     public TMP_Text nameText;
     public TMP_Text costText;
-    private Button button;
+    public Image background;
+
+    [Header("Colores de estado")]
+    public Color purchasedColor = Color.green;
+    public Color lockedColor = Color.gray;
+    public Color availableColor = Color.white;
+    public Color selectedColor = Color.yellow;
 
     private ItemData itemData;
     private ItemGraphUI graphUI;
+    private bool isSelected = false;
 
     public void Initialize(ItemData data, ItemGraphUI graph)
     {
         itemData = data;
         graphUI = graph;
 
-        if (button == null)
-            button = GetComponent<Button>();
+        // Configurar UI
+        if (icon != null && data.icon != null)
+            icon.sprite = data.icon;
 
-        if (button != null)
-        {
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => graphUI.SelectItem(itemData));
-        }
+        if (nameText != null)
+            nameText.text = data.itemName;
 
-        if (icon != null) icon.sprite = data.icon;
-        if (nameText != null) nameText.text = data.itemName;
-        if (costText != null) costText.text = $"{data.cost} oro";
+        if (costText != null)
+            costText.text = $"{data.cost}G";
 
-        UpdateState();
+        UpdateAppearance();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (graphUI != null)
-            graphUI.SelectItem(itemData);
+        graphUI?.OnItemSelected(itemData);
+        SetSelected(true);
     }
 
-    public void UpdateState()
+    public void UpdateAppearance()
     {
-        if (icon == null || itemData == null) return;
+        if (itemData == null) return;
+
+        Color targetColor = availableColor;
 
         if (itemData.isPurchased)
-            icon.color = Color.green;
+            targetColor = purchasedColor;
         else if (!itemData.isUnlocked)
-            icon.color = Color.gray;
-        else
-            icon.color = Color.white;
+            targetColor = lockedColor;
+
+        if (background != null)
+        {
+            background.color = isSelected ? selectedColor : targetColor;
+        }
+
+        if (icon != null)
+        {
+            icon.color = itemData.isPurchased ? purchasedColor :
+                        !itemData.isUnlocked ? lockedColor : availableColor;
+        }
+    }
+
+    public void SetSelected(bool selected)
+    {
+        isSelected = selected;
+        UpdateAppearance();
     }
 }

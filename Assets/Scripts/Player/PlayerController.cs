@@ -14,23 +14,30 @@ public class PlayerController : MonoBehaviour
     public GameObject clickIndicatorPrefab;
 
     private PlayerStats playerStats;
-    private AbilityAimingSystem aiming;   // ← referencia al sistema de apuntado
+    private AbilityAimingSystem aiming;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         cam = Camera.main;
-        playerStats = GameManager.Instance.playerStats;
 
+        // ✅ CORREGIDO: Obtener referencias de manera segura
+        playerStats = GetComponent<PlayerStats>();
         aiming = GetComponent<AbilityAimingSystem>();
+
+        // ✅ CORREGIDO: Verificar referencias críticas
+        if (playerStats == null)
+        {
+            Debug.LogError("❌ PlayerStats no encontrado en el player");
+        }
     }
 
     void Update()
     {
-        if (Keyboard.current.kKey.wasPressedThisFrame)
+        // ✅ CORREGIDO: Verificar antes de usar
+        if (Keyboard.current.kKey.wasPressedThisFrame && playerStats != null)
         {
-            if (playerStats != null)
-                playerStats.AddExperience(50);
+            playerStats.AddExperience(50);
         }
     }
 
@@ -39,19 +46,11 @@ public class PlayerController : MonoBehaviour
         if (!context.performed || !Mouse.current.rightButton.wasPressedThisFrame)
             return;
 
-        // ──────────────────────────────────────────────
-        // BLOQUEAR MOVIMIENTO SI:
-        //  - NO estamos apuntando
-        //  - Y SHIFT está presionado
-        // ──────────────────────────────────────────────
+        // ✅ CORREGIDO: Verificar aiming antes de usar
         if (aiming != null && !aiming.IsAiming && Keyboard.current.shiftKey.isPressed)
         {
-            // Estás manteniendo Shift para entrar a modo apuntado → no se mueve
             return;
         }
-
-        // A PARTIR DE AQUÍ: movimiento normal (sirve tanto si estabas apuntando
-        // y cancelas con click derecho, como si no estabas apuntando).
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit))
@@ -64,14 +63,17 @@ public class PlayerController : MonoBehaviour
             EnemyBase enemy = hit.collider.GetComponent<EnemyBase>();
             PlayerAutoAttack attack = GetComponent<PlayerAutoAttack>();
 
-            if (enemy != null)
+            // ✅ CORREGIDO: Verificar componentes antes de usar
+            if (enemy != null && attack != null)
             {
                 attack.SetAttackTarget(enemy);
                 return;
             }
 
             // click en suelo
-            attack.ClearTarget();
+            if (attack != null)
+                attack.ClearTarget();
+
             agent.stoppingDistance = stoppingDistance;
             agent.SetDestination(hit.point);
         }

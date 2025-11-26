@@ -16,78 +16,51 @@ public class AbilityEffectsController : MonoBehaviour
     public GameObject auraPrefab;
     public GameObject meteorPrefab;
 
-    private bool alreadySubscribed = false;
-
-    IEnumerator Start()
+    private void Start()
     {
-        Debug.Log("[Effects] Start()");
-
-        if (alreadySubscribed)
+        if (abilitySystem != null)
         {
-            Debug.LogWarning("[Effects] YA ESTABA SUSCRITO → evitando duplicado");
-            yield break;
+            abilitySystem.OnAbilityCast += OnAbilityCast;
+        }
+        else
+        {
+            Debug.LogError("❌ AbilitySystem no asignado en EffectsController");
         }
 
-        alreadySubscribed = true;
-
-        if (abilitySystem == null)
-            abilitySystem = GetComponent<AbilitySystem>();
-
+        if (cam == null) cam = Camera.main;
         if (playerStats == null && GameManager.Instance != null)
             playerStats = GameManager.Instance.playerStats;
-
-        if (cam == null)
-            cam = Camera.main;
-
-        float t = 0f;
-        while ((abilitySystem == null || abilitySystem.abilities.Count == 0) && t < 5f)
-        {
-            t += Time.deltaTime;
-            Debug.Log("[Effects] Esperando a AbilitySystem...");
-            yield return null;
-        }
-
-        if (abilitySystem == null || abilitySystem.abilities.Count == 0)
-        {
-            Debug.LogError("[Effects] AbilitySystem no está listo, desactivando.");
-            enabled = false;
-            yield break;
-        }
-
-        Debug.Log("[Effects] AbilitySystem listo. Suscribiendo eventos…");
-
-        if (abilitySystem.abilities.ContainsKey(AbilityType.PrimaryAb))
-        {
-            abilitySystem.abilities[AbilityType.PrimaryAb].OnCast += CastFireball;
-            Debug.Log("[Effects] Suscrito a Q (PrimaryAb)");
-        }
-
-        if (abilitySystem.abilities.ContainsKey(AbilityType.SecondaryAb))
-        {
-            abilitySystem.abilities[AbilityType.SecondaryAb].OnCast += CastAura;
-            Debug.Log("[Effects] Suscrito a W (SecondaryAb)");
-        }
-
-        if (abilitySystem.abilities.ContainsKey(AbilityType.ThirdAb))
-        {
-            abilitySystem.abilities[AbilityType.ThirdAb].OnCast += CastDash;
-            Debug.Log("[Effects] Suscrito a E (ThirdAb)");
-        }
-
-        if (abilitySystem.abilities.ContainsKey(AbilityType.Ultimate))
-        {
-            abilitySystem.abilities[AbilityType.Ultimate].OnCast += CastMeteor;
-            Debug.Log("[Effects] Suscrito a R (Ultimate)");
-        }
-
-        Debug.Log("[Effects] Suscripciones completadas.");
     }
 
-    // ───────────────── FIREBALL ─────────────────
+    private void OnDestroy()
+    {
+        if (abilitySystem != null)
+        {
+            abilitySystem.OnAbilityCast -= OnAbilityCast;
+        }
+    }
+
+    private void OnAbilityCast(AbilityType type)
+    {
+        switch (type)
+        {
+            case AbilityType.PrimaryAb:
+                CastFireball();
+                break;
+            case AbilityType.SecondaryAb:
+                CastAura();
+                break;
+            case AbilityType.ThirdAb:
+                CastDash();
+                break;
+            case AbilityType.Ultimate:
+                CastMeteor();
+                break;
+        }
+    }
+
     void CastFireball()
     {
-        Debug.Log("[Effects] CastFireball() llamado.");
-
         if (abilitySystem == null)
         {
             Debug.LogError("[Effects] abilitySystem es NULL.");
@@ -95,6 +68,7 @@ public class AbilityEffectsController : MonoBehaviour
         }
 
         Ability ab = abilitySystem.abilities[AbilityType.PrimaryAb];
+        int damage = abilitySystem.GetCalculatedDamage(AbilityType.PrimaryAb);
 
         if (fireballPrefab == null)
         {
@@ -112,25 +86,18 @@ public class AbilityEffectsController : MonoBehaviour
             return;
         }
 
-        // Ray hacia el mouse
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        Debug.Log("[Effects] Lanzando Raycast desde mouse…");
-
         if (!Physics.Raycast(ray, out RaycastHit hit))
         {
             Debug.LogWarning("[Effects] Raycast NO golpeó nada.");
             return;
         }
 
-        Debug.Log($"[Effects] Raycast hit → {hit.collider.name} en {hit.point}");
-
-        // 🌟 DIRECCIÓN HORIZONTAL REAL
         Vector3 dir = hit.point - firePoint.position;
-        dir.y = 0f;               // ← IGNORA ALTURA DEL TERRENO
+        dir.y = 0f;
         Vector3 direction = dir.normalized;
 
-        Debug.Log("[Effects] Instanciando Fireball…");
-        Vector3 spawnPos = firePoint.position + Vector3.down * 0.3f; // Baja un poco
+        Vector3 spawnPos = firePoint.position + Vector3.down * 0.3f;
         GameObject fb = Instantiate(fireballPrefab, spawnPos, Quaternion.LookRotation(direction));
 
         if (fb == null)
@@ -138,8 +105,6 @@ public class AbilityEffectsController : MonoBehaviour
             Debug.LogError("[Effects] Instantiate devolvió NULL.");
             return;
         }
-
-        Debug.Log($"[Effects] Fireball instanciada → {fb.name} en {fb.transform.position}");
 
         FireballProjectile proj = fb.GetComponent<FireballProjectile>();
         if (proj == null)
@@ -150,17 +115,12 @@ public class AbilityEffectsController : MonoBehaviour
 
         proj.speed = ab.projectileSpeed;
         proj.range = ab.range;
-        proj.damage = Mathf.RoundToInt(ab.damageBase + ab.damagePerLevel * ab.level);
+        proj.damage = damage;
         proj.explosionRadius = ab.explosionRadius;
-
-        Debug.Log($"[Effects] Fireball configurada: speed={proj.speed}, range={proj.range}, damage={proj.damage}");
     }
 
-    // ─────────── AURA (W) ───────────
     void CastAura()
     {
-        Debug.Log("[Effects] CastAura() llamado.");
-
         Ability ab = abilitySystem.abilities[AbilityType.SecondaryAb];
 
         if (auraPrefab != null)
@@ -196,47 +156,36 @@ public class AbilityEffectsController : MonoBehaviour
         Debug.Log("[Effects] Invulnerable OFF");
     }
 
-    // ─────────── DASH (E) ───────────
     void CastDash()
     {
         Ability ab = abilitySystem.abilities[AbilityType.ThirdAb];
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
 
-        // Ray del mouse al suelo
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         if (!Physics.Raycast(ray, out RaycastHit hit))
             return;
 
-        // Dirección solo en plano
         Vector3 dir = hit.point - transform.position;
         dir.y = 0f;
 
-        // Si el mouse está muy cerca, no hacer dos movimientos
         if (dir.sqrMagnitude < 0.01f)
             return;
 
         float mouseDist = dir.magnitude;
-
-        // UNA SOLA distancia final → evita el doble salto
         float finalDist = Mathf.Min(mouseDist, ab.dashDistance);
-
-        // Punto final horizontal exacto
         Vector3 target = transform.position + dir.normalized * finalDist;
         target.y = transform.position.y;
 
-        // Ajustar navmesh si es necesario
         if (NavMesh.SamplePosition(target, out NavMeshHit navHit, 1f, NavMesh.AllAreas))
             target = navHit.position;
 
-        // Teletransporte INSTANT, el único movimiento real
         agent.Warp(target);
     }
-    // ─────────── METEORO (R) ───────────
+
     void CastMeteor()
     {
-        Debug.Log("[Effects] CastMeteor() llamado.");
-
         Ability ab = abilitySystem.abilities[AbilityType.Ultimate];
+        int damage = abilitySystem.GetCalculatedDamage(AbilityType.Ultimate);
 
         if (meteorPrefab == null || cam == null)
         {
@@ -269,8 +218,6 @@ public class AbilityEffectsController : MonoBehaviour
         proj.targetPosition = impactPoint;
         proj.delay = ab.meteorDelay;
         proj.radius = ab.meteorRadius;
-        proj.damage = Mathf.RoundToInt(ab.damageBase + ab.damagePerLevel * ab.level);
-
-        Debug.Log($"[Effects] Meteor configurado → target={impactPoint}, delay={proj.delay}, radius={proj.radius}, damage={proj.damage}");
+        proj.damage = damage;
     }
 }
