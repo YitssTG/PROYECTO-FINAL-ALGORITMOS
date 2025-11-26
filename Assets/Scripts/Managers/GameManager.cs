@@ -77,8 +77,6 @@ public class GameManager : MonoBehaviour
         monedasTotales += amount;
         Debug.Log($"GameManager: +{amount} monedas. Total: {monedasTotales}");
     }
-
-    // ░█████╗░ TORRETAS ░█████╗░
     public bool CanBuild()
     {
         TowerSO selectedTower = GetSelectedTowerSO();
