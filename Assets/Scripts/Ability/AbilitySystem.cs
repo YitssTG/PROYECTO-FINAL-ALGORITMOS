@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
 public enum AbilityType
@@ -31,18 +30,18 @@ public class AbilitySystem : MonoBehaviour
     public System.Action<AbilityType> OnAbilityCast;
 
     private PlayerStats playerStats;
-    private AbilityAimingSystem aimingSystem;
-    private bool isCtrlPressed = false;
 
     void Start()
     {
-        Initialize();
+        if (abilities.Count == 0)
+        {
+            Initialize();
+        }
     }
 
     public void Initialize()
     {
         playerStats = GameManager.Instance?.playerStats;
-        aimingSystem = GetComponent<AbilityAimingSystem>();
 
         if (playerStats == null)
         {
@@ -131,74 +130,6 @@ public class AbilitySystem : MonoBehaviour
         if (type == AbilityType.Ultimate && playerLevel < 5) return false;
 
         return true;
-    }
-
-    // Sistema de input
-    private bool IsAiming()
-    {
-        return aimingSystem != null && aimingSystem.IsAiming;
-    }
-
-    public void OnCtrlPressed(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed) isCtrlPressed = true;
-        if (ctx.canceled) isCtrlPressed = false;
-    }
-
-    public void OnAbilityQ(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
-        {
-            TryCast(AbilityType.PrimaryAb);
-        }
-    }
-
-    public void OnAbilityW(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
-        {
-            TryCast(AbilityType.SecondaryAb);
-        }
-    }
-
-    public void OnAbilityE(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
-        {
-            TryCast(AbilityType.ThirdAb);
-        }
-    }
-
-    public void OnAbilityR(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && !isCtrlPressed && !Keyboard.current.shiftKey.isPressed && !IsAiming())
-        {
-            TryCast(AbilityType.Ultimate);
-        }
-    }
-
-    public void OnUpgradeQ(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && isCtrlPressed)
-            playerStats?.SpendSkillPoint(AbilityType.PrimaryAb);
-    }
-
-    public void OnUpgradeW(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && isCtrlPressed)
-            playerStats?.SpendSkillPoint(AbilityType.SecondaryAb);
-    }
-
-    public void OnUpgradeE(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && isCtrlPressed)
-            playerStats?.SpendSkillPoint(AbilityType.ThirdAb);
-    }
-
-    public void OnUpgradeR(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && isCtrlPressed)
-            playerStats?.SpendSkillPoint(AbilityType.Ultimate);
     }
 
     public bool TryCast(AbilityType type)

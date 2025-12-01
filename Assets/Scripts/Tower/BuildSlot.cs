@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BuildSlot : MonoBehaviour
 {
@@ -18,14 +18,58 @@ public class BuildSlot : MonoBehaviour
         UpdateColor();
     }
 
+    void OnMouseDown()
+    {
+        if (isOccupied)
+        {
+            Debug.Log("❌ El slot ya está ocupado");
+            return;  // El slot ya está ocupado, no se puede construir más aquí
+        }
+
+        // Siempre intentar construir, pero chequeamos oro dentro
+        TowerSO towerSO = GameManager.Instance.GetSelectedTowerSO();
+        if (towerSO == null)
+        {
+            Debug.LogWarning("❌ No hay torre seleccionada");
+            return;
+        }
+
+        if (GameManager.Instance.SpendGold(towerSO.cost))
+        {
+            PlaceTower(towerSO);
+        }
+        else
+        {
+            Debug.Log($"❌ No tienes suficiente oro para construir {towerSO.name}. Costo: {towerSO.cost}");
+        }
+    }
+
     public void PlaceTower(TowerSO towerSO)
     {
-        if (!isOccupied && towerSO != null)
+        if (towerSO == null) return;
+        if (towerSO.towerPrefab == null)
         {
-            currentTower = Instantiate(towerSO.towerPrefab, transform.position, Quaternion.identity);
-            isOccupied = true;
-            UpdateColor();
+            Debug.LogError($"❌ TowerSO '{towerSO.name}' no tiene prefab asignado");
+            return;
         }
+
+        Debug.Log($"Intentando colocar torre: {towerSO.name}");
+
+        currentTower = Instantiate(towerSO.towerPrefab, transform.position, Quaternion.identity);
+        isOccupied = true;
+        UpdateColor();
+
+        if (TowerManager.Instance != null)
+            TowerManager.Instance.RegisterTower(currentTower);
+
+        TowerHealth health = currentTower.GetComponent<TowerHealth>();
+        if (health == null)
+        {
+            health = currentTower.AddComponent<TowerHealth>();
+            health.maxHealth = 100;
+        }
+
+        Debug.Log($"✅ Torre construida: {currentTower.name}");
     }
 
     void UpdateColor()
@@ -34,11 +78,16 @@ public class BuildSlot : MonoBehaviour
             rend.material.color = isOccupied ? occupiedColor : freeColor;
     }
 
-    void OnMouseDown()
+    public void ClearSlot()
     {
-        if (!isOccupied && GameManager.Instance.CanBuild())
+        if (currentTower != null && TowerManager.Instance != null)
         {
-            GameManager.Instance.TryToBuildTower(this);
+            TowerManager.Instance.UnregisterTower(currentTower);
+            Debug.Log("🧹 Limpiando slot");
         }
+
+        isOccupied = false;
+        currentTower = null;
+        UpdateColor();
     }
 }

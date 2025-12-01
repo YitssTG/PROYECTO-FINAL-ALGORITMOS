@@ -2,19 +2,20 @@
 
 public abstract class EnemyBase : MonoBehaviour
 {
-    [Header("Identidad")]
-    public string enemyName = "Enemy";
+    [HideInInspector] public string enemyName;
+    [HideInInspector] public int health;
+    [HideInInspector] public int damage;
+    [HideInInspector] public int rewardXP;
+    [HideInInspector] public int rewardGold;
+    [HideInInspector] public EnemyMovement movement;
 
-    [Header("Stats")]
-    public int health = 100;
-    public int damage = 10;
+    // 🔹 Evento de muerte para sistemas externos
+    public delegate void EnemyDeathHandler(EnemyBase deadEnemy);
+    public event EnemyDeathHandler OnEnemyDeath;
 
-    [Header("Recompensas")]
-    public int rewardXP = 50;
-    public int rewardGold = 20;
-
-    [Header("Movimiento")]
-    public EnemyMovement movement;
+    public int CurrentHealth => health;
+    public int CurrentDamage => damage;
+    public string EnemyName => enemyName;
 
     protected virtual void Awake()
     {
@@ -22,7 +23,23 @@ public abstract class EnemyBase : MonoBehaviour
             movement = GetComponent<EnemyMovement>();
     }
 
-    public abstract void Attack();
+    public virtual void Initialize(EnemyDataSO data, int waveNumber = 1)
+    {
+        if (data == null) return;
+
+        enemyName = data.enemyName;
+        health = data.baseHealth + waveNumber * 10;
+        damage = data.baseDamage + waveNumber * 5;
+        rewardXP = data.rewardXP;
+        rewardGold = data.rewardGold;
+
+        if (movement != null)
+        {
+            movement.speed = data.moveSpeed;
+            movement.detectionRadius = data.detectionRadius;
+            movement.attackRadius = data.attackRadius;
+        }
+    }
 
     public virtual void TakeDamage(int amount)
     {
@@ -37,10 +54,11 @@ public abstract class EnemyBase : MonoBehaviour
     {
         Debug.Log($"{enemyName} ha muerto.");
 
-        EventManager.EnemyDefeated();
-        EventManager.CoinsCollected(rewardGold);
-        GameManager.Instance.playerStats.AddExperience(rewardXP);
+        // 🔹 Invocar evento de muerte
+        OnEnemyDeath?.Invoke(this);
 
-        movement.Die();
+        Destroy(gameObject);
     }
+
+    public abstract void Attack();
 }

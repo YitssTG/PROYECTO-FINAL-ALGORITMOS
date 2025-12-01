@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5df82c6ee6ed7e749972bcb7922c22ce, type: 3}
+  m_Name: MeleeEnemy
+  m_EditorClassIdentifier: 
+  enemyName: Melee
+  enemyType: 0
+  baseHealth: 120
+  baseDamage: 20
+  moveSpeed: 4
+  attackSpeed: 1.2
+  detectionRadius: 12
+  attackRadius: 2
+  rewardXP: 40
+  rewardGold: 15
+  enemyPrefab: {fileID: 3770319924020552060, guid: def01073c3d96824e9222f441655fb8f, type: 3}

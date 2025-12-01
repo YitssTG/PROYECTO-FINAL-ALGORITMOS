@@ -5,14 +5,15 @@ public class UIManager : MonoBehaviour
 {
     [Header("Referencias UI")]
     public TMP_Text goldText;
-    public TMP_Text healthText;
     public TMP_Text experienceText;
     public TMP_Text enemiesDefeatedText;
     public TMP_Text levelText;
+    public HealthBarUI healthBarUI;
 
     [Header("Referencias de Sistemas")]
-    private GoldManager goldManager;
-    private PlayerStats playerStats;
+    public GoldManager goldManager; // ⭐ ASIGNAR EN INSPECTOR
+    public PlayerStats playerStats; // ⭐ ASIGNAR EN INSPECTOR  
+    public PlayerHealth playerHealth; // ⭐ NUEVO: ASIGNAR EN INSPECTOR
 
     void Start()
     {
@@ -24,82 +25,117 @@ public class UIManager : MonoBehaviour
     #region Inicialización
     private void InitializeReferences()
     {
-        // Obtener referencias del GameManager
-        if (GameManager.Instance != null)
+        // Usar GameManager como fallback solo si las referencias no están asignadas
+        if (goldManager == null && GameManager.Instance != null)
         {
             goldManager = GameManager.Instance.GetGoldManager();
+        }
+
+        if (playerStats == null && GameManager.Instance != null)
+        {
             playerStats = GameManager.Instance.GetPlayerStats();
         }
 
-        // Fallback: buscar directamente si no están en GameManager
-        if (goldManager == null)
-            goldManager = FindObjectOfType<GoldManager>();
-
-        if (playerStats == null)
-            playerStats = FindObjectOfType<PlayerStats>();
+        if (playerHealth == null)
+        {
+            // Buscar en el mismo objeto o padres/hijos, pero NO FindObjectOfType
+            playerHealth = GetComponentInParent<PlayerHealth>();
+            if (playerHealth == null)
+                playerHealth = GetComponentInChildren<PlayerHealth>();
+        }
 
         // Verificar componentes críticos
         if (goldManager == null)
-            Debug.LogError("❌ GoldManager no encontrado");
+            Debug.LogError("❌ GoldManager no encontrado. Asigna la referencia en Inspector.");
         else
             Debug.Log("✅ GoldManager encontrado");
 
         if (playerStats == null)
-            Debug.LogError("❌ PlayerStats no encontrado");
+            Debug.LogError("❌ PlayerStats no encontrado. Asigna la referencia en Inspector.");
         else
             Debug.Log("✅ PlayerStats encontrado");
+
+        if (playerHealth == null)
+            Debug.LogError("❌ PlayerHealth no encontrado. Asigna la referencia en Inspector.");
+        else
+            Debug.Log("✅ PlayerHealth encontrado");
+
+        if (healthBarUI == null)
+            Debug.LogError("❌ HealthBarUI no asignado en UIManager");
+        else
+            Debug.Log("✅ HealthBarUI encontrado");
     }
 
     private void SetupEventListeners()
     {
-        // Gold Manager events - VERIFICAR QUE OnGoldChanged EXISTA
+        // Gold Manager events
         if (goldManager != null)
         {
-            // Verificar si el evento existe antes de agregar el listener
-            var eventField = goldManager.GetType().GetField("OnGoldChanged");
-            if (eventField != null)
+            // Usar el evento directamente si existe
+            if (goldManager.OnGoldChanged != null)
             {
                 goldManager.OnGoldChanged.AddListener(UpdateGoldDisplay);
-                Debug.Log("✅ Listener de oro configurado");
             }
-            else
-            {
-                Debug.LogWarning("⚠️ OnGoldChanged no existe en GoldManager, usando actualización manual");
-                // Actualización manual en Update
-            }
+        }
+
+        // Player Health events
+        if (playerHealth != null)
+        {
+            playerHealth.OnHealthChanged.AddListener(OnHealthChanged);
         }
 
         // Player Stats events
         if (playerStats != null)
         {
-            if (playerStats.OnHealthChanged != null)
-                playerStats.OnHealthChanged.AddListener(UpdateHealthDisplay);
-
             if (playerStats.OnExperienceChanged != null)
                 playerStats.OnExperienceChanged.AddListener(UpdateExperienceDisplay);
 
             if (playerStats.OnLevelChanged != null)
                 playerStats.OnLevelChanged.AddListener(UpdateLevelDisplay);
         }
+
+        // Eventos de autocuración
+        EventManager.OnHealthRegenStarted += OnHealthRegenStarted;
+        EventManager.OnHealthRegenStopped += OnHealthRegenStopped;
+        EventManager.OnHealthRegenTick += OnHealthRegenTick;
     }
     #endregion
 
     #region Actualización de UI
     private void Update()
     {
-        // Actualización manual como fallback si los eventos no funcionan
+        // Actualización manual como fallback
         UpdateGoldDisplayManual();
         UpdateEnemiesDefeatedDisplay();
     }
 
     private void UpdateAllDisplays()
     {
-        // Actualizar toda la UI al inicio
         UpdateGoldDisplayManual();
-        UpdateHealthDisplayManual();
         UpdateExperienceDisplayManual();
         UpdateLevelDisplayManual();
         UpdateEnemiesDefeatedDisplay();
+    }
+
+    private void OnHealthChanged(int currentHealth)
+    {
+        // HealthBarUI maneja su propia actualización
+        Debug.Log($"❤️ Vida actualizada: {currentHealth}");
+    }
+
+    private void OnHealthRegenStarted()
+    {
+        Debug.Log("🔄 Autocuración iniciada - Efectos visuales pueden ir aquí");
+    }
+
+    private void OnHealthRegenStopped()
+    {
+        Debug.Log("⏹️ Autocuración detenida");
+    }
+
+    private void OnHealthRegenTick(int healAmount)
+    {
+        Debug.Log($"💚 Curación tick: +{healAmount} HP");
     }
 
     // Métodos con eventos
@@ -107,12 +143,6 @@ public class UIManager : MonoBehaviour
     {
         if (goldText != null)
             goldText.text = $"💰 {newGoldAmount}G";
-    }
-
-    private void UpdateHealthDisplay(int newHealthAmount)
-    {
-        if (healthText != null)
-            healthText.text = $"❤️ {newHealthAmount}";
     }
 
     private void UpdateExperienceDisplay(int newExperienceAmount)
@@ -132,12 +162,6 @@ public class UIManager : MonoBehaviour
     {
         if (goldText != null && goldManager != null)
             goldText.text = $"💰 {goldManager.currentGold}G";
-    }
-
-    private void UpdateHealthDisplayManual()
-    {
-        if (healthText != null && playerStats != null)
-            healthText.text = $"❤️ {playerStats.currentHealth}";
     }
 
     private void UpdateExperienceDisplayManual()
@@ -160,52 +184,36 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Método público para forzar actualización
     public void RefreshAllUI()
     {
         UpdateAllDisplays();
-        Debug.Log("🔄 UI actualizada manualmente");
     }
     #endregion
 
     #region Eventos y Cleanup
-    void OnEnable()
-    {
-        // Escuchar eventos globales si existen
-        // EventManager.OnEnemyDefeated += UpdateEnemiesDefeatedDisplay;
-    }
-
-    void OnDisable()
-    {
-        // Remover eventos globales
-        // EventManager.OnEnemyDefeated -= UpdateEnemiesDefeatedDisplay;
-
-        // Limpiar listeners
-        CleanupEventListeners();
-    }
-
-    private void OnDestroy()
-    {
-        CleanupEventListeners();
-    }
-
     private void CleanupEventListeners()
     {
-        // Limpiar todos los listeners
         if (goldManager != null && goldManager.OnGoldChanged != null)
             goldManager.OnGoldChanged.RemoveListener(UpdateGoldDisplay);
 
+        if (playerHealth != null)
+            playerHealth.OnHealthChanged.RemoveListener(OnHealthChanged);
+
         if (playerStats != null)
         {
-            if (playerStats.OnHealthChanged != null)
-                playerStats.OnHealthChanged.RemoveListener(UpdateHealthDisplay);
-
             if (playerStats.OnExperienceChanged != null)
                 playerStats.OnExperienceChanged.RemoveListener(UpdateExperienceDisplay);
 
             if (playerStats.OnLevelChanged != null)
                 playerStats.OnLevelChanged.RemoveListener(UpdateLevelDisplay);
         }
+
+        EventManager.OnHealthRegenStarted -= OnHealthRegenStarted;
+        EventManager.OnHealthRegenStopped -= OnHealthRegenStopped;
+        EventManager.OnHealthRegenTick -= OnHealthRegenTick;
     }
+
+    void OnDisable() => CleanupEventListeners();
+    void OnDestroy() => CleanupEventListeners();
     #endregion
 }

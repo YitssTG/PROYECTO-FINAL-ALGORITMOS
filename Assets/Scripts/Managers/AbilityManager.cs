@@ -11,6 +11,7 @@ public class AbilityManager : MonoBehaviour
     public AbilitySystem abilitySystem;
     public AbilityAimingSystem aimingSystem;
     public AbilityEffectsController effectsController;
+    public AbilityInputHandler inputHandler;
 
     private bool isInitialized = false;
 
@@ -47,6 +48,7 @@ public class AbilityManager : MonoBehaviour
         abilitySystem = player.GetComponent<AbilitySystem>();
         aimingSystem = player.GetComponent<AbilityAimingSystem>();
         effectsController = player.GetComponent<AbilityEffectsController>();
+        inputHandler = player.GetComponent<AbilityInputHandler>();
 
         // Verificar componentes críticos
         if (abilitySystem == null)
@@ -79,6 +81,13 @@ public class AbilityManager : MonoBehaviour
         {
             effectsController.abilitySystem = abilitySystem;
             Debug.Log("✅ AbilityEffectsController conectado");
+        }
+
+        if (inputHandler != null)
+        {
+            inputHandler.abilitySystem = abilitySystem;
+            inputHandler.aimingSystem = aimingSystem;
+            Debug.Log("✅ AbilityInputHandler conectado");
         }
 
         isInitialized = true;

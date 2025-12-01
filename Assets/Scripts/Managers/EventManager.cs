@@ -1,65 +1,58 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
+using UnityEngine;
 
-public class EventManager : MonoBehaviour
+public static class EventManager
 {
-    public static EventManager Instance;
-
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    // 🎯 EVENTOS DE JUEGO
+    // 🎯 EVENTOS DE JUEGO EXISTENTES
     public static event Action<int> OnCoinsCollected;
     public static event Action<int> OnLifeChanged;
     public static event Action OnPlayerDied;
     public static event Action OnVictory;
     public static event Action OnGameOver;
     public static event Action OnEnemyDefeated;
+    public static event Action<int> OnWaveStarted;
+    public static event Action<int> OnWaveCompleted;
+    public static event Action OnHealthRegenStarted;
+    public static event Action OnHealthRegenStopped;
+    public static event Action<int> OnHealthRegenTick;
 
-    // 🎮 INVOCADORES
-    public static void CoinsCollected(int amount)
-    {
-        if (OnCoinsCollected != null)
-            OnCoinsCollected(amount);
-    }
+    // ⭐ NUEVOS EVENTOS PARA PLAYER
+    public static event Action<EnemyBase, int> OnPlayerAttacked; // enemy, damage
+    public static event Action<int> OnPlayerLevelUp; // newLevel
+    public static event Action OnPlayerStatsChanged;
 
-    public static void LifeChanged(int life)
-    {
-        if (OnLifeChanged != null)
-            OnLifeChanged(life);
-    }
 
-    public static void PlayerDied()
-    {
-        if (OnPlayerDied != null)
-            OnPlayerDied();
-    }
+    // 🎮 INVOCADORES EXISTENTES
+    public static void CoinsCollected(int amount) => OnCoinsCollected?.Invoke(amount);
+    public static void LifeChanged(int life) => OnLifeChanged?.Invoke(life);
+    public static void PlayerDied() => OnPlayerDied?.Invoke();
+    public static void Victory() => OnVictory?.Invoke();
+    public static void GameOver() => OnGameOver?.Invoke();
+    public static void EnemyDefeated() => OnEnemyDefeated?.Invoke();
+    public static void WaveStarted(int waveNumber) => OnWaveStarted?.Invoke(waveNumber);
+    public static void WaveCompleted(int waveNumber) => OnWaveCompleted?.Invoke(waveNumber);
 
-    public static void Victory()
-    {
-        if (OnVictory != null)
-            OnVictory();
-    }
+    // ⭐ NUEVOS INVOCADORES
+    public static void PlayerAttacked(EnemyBase enemy, int damage) => OnPlayerAttacked?.Invoke(enemy, damage);
+    public static void PlayerLevelUp(int newLevel) => OnPlayerLevelUp?.Invoke(newLevel);
+    public static void PlayerStatsChanged() => OnPlayerStatsChanged?.Invoke();
+    public static void HealthRegenStarted() => OnHealthRegenStarted?.Invoke();
+    public static void HealthRegenStopped() => OnHealthRegenStopped?.Invoke();
+    public static void HealthRegenTick(int healAmount) => OnHealthRegenTick?.Invoke(healAmount);
 
-    public static void GameOver()
+    // 🔧 MÉTODOS DE UTILIDAD PARA LIMPIAR EVENTOS
+    public static void ClearAllEvents()
     {
-        if (OnGameOver != null)
-            OnGameOver();
-    }
-
-    public static void EnemyDefeated()
-    {
-        if (OnEnemyDefeated != null)
-            OnEnemyDefeated();
+        OnCoinsCollected = null;
+        OnLifeChanged = null;
+        OnPlayerDied = null;
+        OnVictory = null;
+        OnGameOver = null;
+        OnEnemyDefeated = null;
+        OnWaveStarted = null;
+        OnWaveCompleted = null;
+        OnPlayerAttacked = null;
+        OnPlayerLevelUp = null;
+        OnPlayerStatsChanged = null;
     }
 }

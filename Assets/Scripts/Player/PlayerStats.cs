@@ -9,57 +9,142 @@ public class PlayerStats : MonoBehaviour
     public int experienceToNext = 100;
     public int skillPoints = 0;
 
-    [Header("Estadísticas Base")]
+    [Header("Estadísticas de Combate")]
     public float baseDamage = 10f;
     public float baseSpeed = 5f;
     public float baseArmor = 0f;
-
-    [Header("Salud")]
-    public int maxHealth = 100;
-    public int currentHealth;
-    public bool isInvulnerable = false;
 
     // Estadísticas actuales (base + items)
     public float CurrentDamage { get; private set; }
     public float CurrentSpeed { get; private set; }
     public float CurrentArmor { get; private set; }
 
-    // ✅ AGREGADO: Propiedad pública temporal para compatibilidad
-    public float damage => CurrentDamage;
+    // Referencia cacheada a PlayerHealth
+    private PlayerHealth _playerHealth;
+    private PlayerHealth PlayerHealth
+    {
+        get
+        {
+            if (_playerHealth == null)
+                _playerHealth = GetComponent<PlayerHealth>();
+            return _playerHealth;
+        }
+    }
 
-    // Eventos para UI
-    public UnityEvent<int> OnHealthChanged = new();
+    // Eventos
     public UnityEvent<int> OnExperienceChanged = new();
     public UnityEvent<int> OnLevelChanged = new();
+    public UnityEvent OnStatsChanged = new();
 
-    private void Start()
+    void Start()
     {
         InitializeStats();
-        SetupNavMeshAgent();
     }
 
     #region Inicialización
     private void InitializeStats()
     {
-        // Inicializar estadísticas
         CurrentDamage = baseDamage;
         CurrentSpeed = baseSpeed;
         CurrentArmor = baseArmor;
 
-        // Inicializar salud
-        currentHealth = maxHealth;
-        OnHealthChanged.Invoke(currentHealth);
-
-        Debug.Log($"🎯 PlayerStats inicializado - Nivel {playerLevel}, Vida {currentHealth}/{maxHealth}");
+        UpdateMovementSpeed();
+        Debug.Log($"🎯 PlayerStats inicializado - Nivel {playerLevel}");
     }
 
-    private void SetupNavMeshAgent()
+    private void UpdateMovementSpeed()
     {
         var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (agent != null)
         {
             agent.speed = CurrentSpeed;
-            Debug.Log($"[NAVMESH] Velocidad establecida a {CurrentSpeed}");
+        }
+    }
+    #endregion
+
+    #region ⭐ MÉTODOS DE REDIRECCIÓN PARA SISTEMAS EXISTENTES
+    // Estos métodos existen para que el código legacy funcione
+    // pero muestran advertencias para que eventualmente los cambies
+
+    public bool isInvulnerable
+    {
+        get
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.isInvulnerable en lugar de playerStats.isInvulnerable");
+            return PlayerHealth != null && PlayerHealth.isInvulnerable;
+        }
+        set
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.isInvulnerable en lugar de playerStats.isInvulnerable");
+            if (PlayerHealth != null)
+                PlayerHealth.isInvulnerable = value;
+        }
+    }
+
+    public void TakeDamage(int amount)
+    {
+        Debug.LogWarning("⚠️ Usa playerHealth.TakeDamage() en lugar de playerStats.TakeDamage()");
+        if (PlayerHealth != null)
+        {
+            PlayerHealth.TakeDamage(amount);
+        }
+        else
+        {
+            Debug.LogError("❌ PlayerHealth no encontrado");
+        }
+    }
+
+    public void Heal(int amount)
+    {
+        Debug.LogWarning("⚠️ Usa playerHealth.Heal() en lugar de playerStats.Heal()");
+        if (PlayerHealth != null)
+        {
+            PlayerHealth.Heal(amount);
+        }
+    }
+
+    public int currentHealth
+    {
+        get
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.currentHealth en lugar de playerStats.currentHealth");
+            return PlayerHealth != null ? PlayerHealth.currentHealth : 0;
+        }
+        set
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.currentHealth en lugar de playerStats.currentHealth");
+            if (PlayerHealth != null)
+                PlayerHealth.currentHealth = value;
+        }
+    }
+
+    public int maxHealth
+    {
+        get
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.maxHealth en lugar de playerStats.maxHealth");
+            return PlayerHealth != null ? PlayerHealth.maxHealth : 100;
+        }
+        set
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.maxHealth en lugar de playerStats.maxHealth");
+            if (PlayerHealth != null)
+                PlayerHealth.maxHealth = value;
+        }
+    }
+
+    public bool isDead
+    {
+        get
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.isDead en lugar de playerStats.isDead");
+            return PlayerHealth != null && PlayerHealth.isDead;
+        }
+        set
+        {
+            Debug.LogWarning("⚠️ Usa playerHealth.isDead en lugar de playerStats.isDead");
+            if (PlayerHealth != null)
+                PlayerHealth.isDead = value;
         }
     }
     #endregion
@@ -67,10 +152,10 @@ public class PlayerStats : MonoBehaviour
     #region Sistema de Experiencia y Nivel
     public void AddExperience(int amount)
     {
-        if (amount <= 0) return;
+        if (amount <= 0 || (PlayerHealth != null && PlayerHealth.isDead)) return;
 
         experience += amount;
-        OnExperienceChanged.Invoke(experience);
+        OnExperienceChanged?.Invoke(experience);
         Debug.Log($"📚 +{amount} XP. Total: {experience}/{experienceToNext}");
 
         CheckLevelUp();
@@ -89,130 +174,32 @@ public class PlayerStats : MonoBehaviour
         experience -= experienceToNext;
         playerLevel++;
         skillPoints++;
-
-        // Aumentar experiencia requerida para siguiente nivel
         experienceToNext = Mathf.RoundToInt(experienceToNext * 1.5f);
 
-        OnLevelChanged.Invoke(playerLevel);
-        Debug.Log($"🎉 ¡Nivel {playerLevel} alcanzado! Puntos de habilidad: {skillPoints}");
-    }
-    #endregion
+        OnLevelChanged?.Invoke(playerLevel);
+        EventManager.PlayerLevelUp(playerLevel);
 
-    #region Sistema de Salud
-    public void TakeDamage(int amount)
-    {
-        if (isInvulnerable || amount <= 0) return;
-
-        // Aplicar reducción de daño por armadura
-        int finalDamage = Mathf.Max(1, amount - Mathf.RoundToInt(CurrentArmor));
-
-        currentHealth -= finalDamage;
-        currentHealth = Mathf.Max(0, currentHealth);
-
-        OnHealthChanged.Invoke(currentHealth);
-        Debug.Log($"💔 {finalDamage} daño recibido. Vida: {currentHealth}/{maxHealth}");
-
-        CheckDeath();
-    }
-
-    public void Heal(int amount)
-    {
-        if (amount <= 0) return;
-
-        currentHealth += amount;
-        currentHealth = Mathf.Min(currentHealth, maxHealth);
-
-        OnHealthChanged.Invoke(currentHealth);
-        Debug.Log($"❤️ Curado {amount}. Vida: {currentHealth}/{maxHealth}");
-    }
-
-    private void CheckDeath()
-    {
-        if (currentHealth <= 0)
-        {
-            Debug.Log("💀 PLAYER MURIÓ");
-            // Aquí podrías llamar a GameManager para game over
-            Destroy(gameObject);
-        }
-    }
-    #endregion
-
-    #region Sistema de Items y Mejoras
-    public void ApplyItemStats(ItemData item)
-    {
-        if (item == null) return;
-
-        CurrentDamage += item.bonusDamage;
-        CurrentArmor += item.bonusArmor;
-        CurrentSpeed += item.bonusSpeed;
-
-        UpdateNavMeshSpeed();
-
-        Debug.Log($"[ITEM] {item.itemName} aplicado → " +
-                 $"Daño: +{item.bonusDamage}, Armadura: +{item.bonusArmor}, Velocidad: +{item.bonusSpeed}");
-        Debug.Log($"[STATS] Actuales → Daño: {CurrentDamage}, Armadura: {CurrentArmor}, Velocidad: {CurrentSpeed}");
-    }
-
-    public void RemoveItemStats(ItemData item)
-    {
-        if (item == null) return;
-
-        CurrentDamage -= item.bonusDamage;
-        CurrentArmor -= item.bonusArmor;
-        CurrentSpeed -= item.bonusSpeed;
-
-        UpdateNavMeshSpeed();
-
-        Debug.Log($"[ITEM] {item.itemName} removido → " +
-                 $"Daño: -{item.bonusDamage}, Armadura: -{item.bonusArmor}, Velocidad: -{item.bonusSpeed}");
-    }
-
-    // ✅ AGREGADO: Métodos para aumentar stats individualmente
-    public void IncreaseDamage(float amount)
-    {
-        CurrentDamage += amount;
-        Debug.Log($"⚔️ Daño aumentado: +{amount}. Total: {CurrentDamage}");
-    }
-
-    public void IncreaseArmor(float amount)
-    {
-        CurrentArmor += amount;
-        Debug.Log($"🛡️ Armadura aumentada: +{amount}. Total: {CurrentArmor}");
-    }
-
-    public void IncreaseSpeed(float amount)
-    {
-        CurrentSpeed += amount;
-        UpdateNavMeshSpeed();
-        Debug.Log($"🏃 Velocidad aumentada: +{amount}. Total: {CurrentSpeed}");
-    }
-
-    private void UpdateNavMeshSpeed()
-    {
-        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        if (agent != null)
-        {
-            agent.speed = CurrentSpeed;
-        }
+        Debug.Log($"🎉 ¡Nivel {playerLevel} alcanzado! Puntos restantes: {skillPoints}");
     }
     #endregion
 
     #region Sistema de Habilidades
     public bool SpendSkillPoint(AbilityType abilityKey)
     {
-        if (skillPoints <= 0)
+        if (skillPoints <= 0 || (PlayerHealth != null && PlayerHealth.isDead))
         {
-            Debug.Log("❌ No hay puntos de habilidad disponibles");
+            Debug.Log("⚠️ No hay puntos de habilidad disponibles");
             return false;
         }
 
-        if (GameManager.Instance == null || GameManager.Instance.abilitySystem == null)
+        AbilitySystem abilitySystem = GetComponent<AbilitySystem>();
+        if (abilitySystem == null)
         {
-            Debug.LogError("❌ AbilitySystem no disponible");
+            Debug.LogError("❌ AbilitySystem no encontrado en el player");
             return false;
         }
 
-        bool upgraded = GameManager.Instance.abilitySystem.TryUpgradeAbility(abilityKey, playerLevel);
+        bool upgraded = abilitySystem.TryUpgradeAbility(abilityKey, playerLevel);
         if (upgraded)
         {
             skillPoints--;
@@ -225,18 +212,81 @@ public class PlayerStats : MonoBehaviour
     }
     #endregion
 
+    #region Métodos de Mejora de Stats
+    public void IncreaseDamage(float amount)
+    {
+        CurrentDamage += amount;
+        OnStatsChanged?.Invoke();
+        EventManager.PlayerStatsChanged();
+        Debug.Log($"⚔️ Daño aumentado: +{amount}. Total: {CurrentDamage}");
+    }
+
+    public void IncreaseArmor(float amount)
+    {
+        CurrentArmor += amount;
+        OnStatsChanged?.Invoke();
+        EventManager.PlayerStatsChanged();
+        Debug.Log($"🛡️ Armadura aumentada: +{amount}. Total: {CurrentArmor}");
+    }
+
+    public void IncreaseSpeed(float amount)
+    {
+        CurrentSpeed += amount;
+        UpdateMovementSpeed();
+        OnStatsChanged?.Invoke();
+        EventManager.PlayerStatsChanged();
+        Debug.Log($"🏃 Velocidad aumentada: +{amount}. Total: {CurrentSpeed}");
+    }
+    #endregion
+
+    #region Sistema de Items y Mejoras
+    public void ApplyItemStats(ItemData item)
+    {
+        if (item == null || (PlayerHealth != null && PlayerHealth.isDead)) return;
+
+        CurrentDamage += item.bonusDamage;
+        CurrentArmor += item.bonusArmor;
+        CurrentSpeed += item.bonusSpeed;
+
+        UpdateMovementSpeed();
+        OnStatsChanged?.Invoke();
+        EventManager.PlayerStatsChanged();
+
+        Debug.Log($"[ITEM] {item.itemName} aplicado");
+    }
+
+    public void RemoveItemStats(ItemData item)
+    {
+        if (item == null) return;
+
+        CurrentDamage -= item.bonusDamage;
+        CurrentArmor -= item.bonusArmor;
+        CurrentSpeed -= item.bonusSpeed;
+
+        UpdateMovementSpeed();
+        OnStatsChanged?.Invoke();
+        EventManager.PlayerStatsChanged();
+
+        Debug.Log($"[ITEM] {item.itemName} removido");
+    }
+    #endregion
+
     #region Utilidades
     public void AddGold(int amount)
     {
-        if (GoldManager.Instance != null)
-            GoldManager.Instance.AddGold(amount);
+        if (PlayerHealth != null && PlayerHealth.isDead) return;
+        GoldManager.Instance?.AddGold(amount);
     }
 
     public bool SpendGold(int cost)
     {
-        return GoldManager.Instance != null && GoldManager.Instance.SpendGold(cost);
+        if (PlayerHealth != null && PlayerHealth.isDead) return false;
+        return GoldManager.Instance?.SpendGold(cost) ?? false;
     }
 
-    public float GetHealthPercentage() => (float)currentHealth / maxHealth;
+    public bool IsAlive()
+    {
+        return PlayerHealth != null ? PlayerHealth.IsAlive() : true;
+    }
     #endregion
 }

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5df82c6ee6ed7e749972bcb7922c22ce, type: 3}
+  m_Name: MiniTankEnemy
+  m_EditorClassIdentifier: 
+  enemyName: MiniTank
+  enemyType: 2
+  baseHealth: 250
+  baseDamage: 25
+  moveSpeed: 2
+  attackSpeed: 0.8
+  detectionRadius: 15
+  attackRadius: 4
+  rewardXP: 100
+  rewardGold: 50
+  enemyPrefab: {fileID: 974820351747600714, guid: ddacb62083411ea4e8270a412f87bc1f, type: 3}

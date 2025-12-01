@@ -42,31 +42,8 @@ public class AbilityAimingSystem : MonoBehaviour
         if (cam == null) cam = Camera.main;
     }
 
-    public void OnAbilityQ(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed && !isAiming)
-            StartAiming(AbilityType.PrimaryAb);
-    }
-
-    public void OnAbilityW(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed && !isAiming)
-            StartAiming(AbilityType.SecondaryAb);
-    }
-
-    public void OnAbilityE(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed)
-            abilitySystem.TryCast(AbilityType.ThirdAb);
-    }
-
-    public void OnAbilityR(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed && Keyboard.current.shiftKey.isPressed && !isAiming)
-            StartAiming(AbilityType.Ultimate);
-    }
-
-    void StartAiming(AbilityType type)
+    // Método público para que AbilityInputHandler inicie el apuntado
+    public void StartAiming(AbilityType type)
     {
         if (isAiming) EndAiming();
 
@@ -185,7 +162,7 @@ public class AbilityAimingSystem : MonoBehaviour
         currentIndicatorSecondary.transform.position = new Vector3(point.x, indicatorsY, point.z);
     }
 
-    void EndAiming()
+    public void EndAiming()
     {
         isAiming = false;
         currentAbility = AbilityType.None;

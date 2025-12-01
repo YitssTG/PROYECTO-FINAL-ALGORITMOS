@@ -1,94 +1,104 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Header("Enemigos por oleada")]
+    public EnemyDataSO meleeEnemySO;
+    public EnemyDataSO rangedEnemySO;
+    public EnemyDataSO miniTankEnemySO;
+
+    [Header("Cantidad base por grupo (se escalará con la oleada)")]
+    public int meleeBase = 1;
+    public int rangedBase = 1;
+    public int miniTankBase = 0;
+
+    [Header("Referencias")]
     public Transform player;
-    public Transform endPoint;
+    public Transform endPoint; // Cada spawner su propio endPoint
 
-    public GameObject enemyMeleePrefab;
-    public int meleePorGrupo = 0;
-
-    public GameObject enemyRangedPrefab;
-    public int rangedPorGrupo = 1;
-
-    public GameObject enemyMiniTankPrefab;
-    public int miniTankPorGrupo = 0;
-
+    [Header("Configuración de spawn")]
     public float radioSpawn = 10f;
-    public float intervaloEntreGrupos = 20f;
     public float intervaloEntreEnemigos = 0.5f;
 
-    private List<GameObject> enemigosVivos = new List<GameObject>();
     private bool puedeSpawnear = false;
-    private float tiempoSiguienteGrupo = 0f;
 
     void Update()
     {
-        if (!puedeSpawnear) return;
-
-        tiempoSiguienteGrupo -= Time.deltaTime;
-        if (tiempoSiguienteGrupo <= 0)
-        {
-            StartCoroutine(SpawnGrupoConDelay());
-            tiempoSiguienteGrupo = intervaloEntreGrupos;
-        }
-    }
-
-    private IEnumerator SpawnGrupoConDelay()
-    {
-        for (int i = 0; i < meleePorGrupo; i++)
-            yield return SpawnEnemy(enemyMeleePrefab);
-
-        for (int i = 0; i < rangedPorGrupo; i++)
-            yield return SpawnEnemy(enemyRangedPrefab);
-
-        for (int i = 0; i < miniTankPorGrupo; i++)
-            yield return SpawnEnemy(enemyMiniTankPrefab);
-    }
-
-    private IEnumerator SpawnEnemy(GameObject prefab)
-    {
-        if (prefab == null) yield break;
-
-        GameObject enemigo = Instantiate(prefab, GetRandomPosition(), Quaternion.identity);
-
-        EnemyMovement mov = enemigo.GetComponent<EnemyMovement>();
-        if (mov != null)
-        {
-            mov.target = player;
-
-            if (endPoint != null)
-                mov.SetWalkDestination(endPoint.position);
-        }
-
-        enemigosVivos.Add(enemigo);
-        yield return new WaitForSeconds(intervaloEntreEnemigos);
-    }
-
-    private Vector3 GetRandomPosition()
-    {
-        Vector3 pos = transform.position + Random.insideUnitSphere * radioSpawn;
-        pos.y = 0;
-        return pos;
+        // No hacemos nada, spawn controlado por WaveManager
     }
 
     public void SetActive(bool active)
     {
         puedeSpawnear = active;
-        tiempoSiguienteGrupo = 0f;
     }
 
-    // ⭐⭐⭐ Este método DEBE existir para evitar tu error
-    public void ActualizarDificultad(int numeroOleada, int incremento)
+    public IEnumerator SpawnOleada(int waveNumber)
     {
-        meleePorGrupo += incremento;
-        rangedPorGrupo += incremento / 2;
-        miniTankPorGrupo += incremento / 2;
+        if (!puedeSpawnear) yield break;
 
-        intervaloEntreGrupos = Mathf.Max(5f, intervaloEntreGrupos - 1f);
+        // La cantidad de grupos por oleada = número de oleada (1,2,3)
+        int grupos = waveNumber;
+        for (int g = 0; g < grupos; g++)
+        {
+            // Spawnear melee
+            for (int i = 0; i < meleeBase; i++)
+                yield return SpawnEnemy(meleeEnemySO, waveNumber);
 
-        Debug.Log($"Spawner {name}: dificultad actualizada en oleada {numeroOleada}");
+            // Spawnear ranged
+            for (int i = 0; i < rangedBase; i++)
+                yield return SpawnEnemy(rangedEnemySO, waveNumber);
+
+            // Spawnear miniTank
+            for (int i = 0; i < miniTankBase; i++)
+                yield return SpawnEnemy(miniTankEnemySO, waveNumber);
+
+            // Espera entre grupos
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    private IEnumerator SpawnEnemy(EnemyDataSO data, int waveNumber)
+    {
+        if (data == null || data.enemyPrefab == null) yield break;
+
+        Vector3 spawnPos = transform.position + Random.insideUnitSphere * radioSpawn;
+        spawnPos.y = 0;
+
+        GameObject enemigoGO = Instantiate(data.enemyPrefab, spawnPos, Quaternion.identity);
+        EnemyBase enemigoBase = enemigoGO.GetComponent<EnemyBase>();
+        if (enemigoBase != null)
+        {
+            enemigoBase.Initialize(data, waveNumber); // Stats desde SO
+        }
+
+        EnemyMovement mov = enemigoGO.GetComponent<EnemyMovement>();
+        if (mov != null)
+        {
+            mov.target = player;
+            if (endPoint != null) mov.SetWalkDestination(endPoint.position);
+            EnemyManager.Instance?.Registrar(mov);
+        }
+
+        yield return new WaitForSeconds(intervaloEntreEnemigos);
+    }
+
+    public void ActualizarDificultad(int waveNumber)
+    {
+        EnemyDataSO[] enemiesToSpawn = { meleeEnemySO, rangedEnemySO, miniTankEnemySO };
+        for (int i = 0; i < enemiesToSpawn.Length; i++)
+        {
+            EnemyDataSO data = enemiesToSpawn[i];
+            if (data == null) continue;
+
+            EnemyStats stats = data.GetScaledStats(waveNumber);
+            Debug.Log($"Spawner {name} - {data.enemyName} configurado: HP {stats.health}, DMG {stats.damage}");
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, radioSpawn);
     }
 }

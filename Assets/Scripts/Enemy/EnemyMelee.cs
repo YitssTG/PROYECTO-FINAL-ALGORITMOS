@@ -1,31 +1,29 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyMelee : EnemyBase
 {
-    [Header("Par�metros")]
-    public float detectionRadius = 3f;
-    public float attackRadius = 1.5f;
-    public float moveSpeed = 3.5f;
-
-    protected override void Awake()
-    {
-        base.Awake();
-
-        enemyName = "Melee";
-        movement.detectionRadius = detectionRadius;
-        movement.attackRadius = attackRadius;
-        movement.speed = moveSpeed;
-    }
-
-    public override void Die()
-    {
-        rewardGold = 30;
-        rewardXP = 60;
-        base.Die();
-    }
+    [Header("Comportamiento Melee")]
+    [HideInInspector] public float chargeSpeed = 5f;
+    [HideInInspector] public float stunDuration = 0.5f;
 
     public override void Attack()
     {
-        Debug.Log($"{enemyName} golpea cuerpo a cuerpo con {damage} de da�o.");
+        Debug.Log($"⚔️ {enemyName} ataque MELEE - Carga con {damage} de daño");
+
+        if (movement != null && movement.target != null)
+        {
+            Vector3 chargeDirection = (movement.target.position - transform.position).normalized;
+        }
+    }
+
+    public override void TakeDamage(int amount)
+    {     
+        int reducedDamage = Mathf.RoundToInt(amount * 0.8f);
+        base.TakeDamage(reducedDamage);
+    }
+
+    public void PerformChargeAttack()
+    {
+        Debug.Log($"{enemyName} realiza carga a velocidad {chargeSpeed}");
     }
 }

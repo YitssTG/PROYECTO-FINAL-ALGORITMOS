@@ -27,33 +27,47 @@ public class EnemyAttack : MonoBehaviour
         float dist = Vector3.Distance(transform.position, mov.target.position);
 
         if (dist <= mov.attackRadius)
-            TryAttack();
+        {
+            TryAttack(mov.target); // Atacamos directamente al jugador
+        }
     }
 
-    void TryAttack()
+    void TryAttack(Transform attackTarget)
     {
         if (Time.time < nextAttack) return;
         nextAttack = Time.time + attackCooldown;
 
         if (isRanged)
-            Shoot();
+            Shoot(attackTarget);
         else
-            GameManager.Instance.playerStats.TakeDamage(enemy.damage);
-
-        enemy.Attack();
+            ApplyMeleeDamage(attackTarget);
     }
 
-    void Shoot()
+    void ApplyMeleeDamage(Transform attackTarget)
+    {
+        if (attackTarget.CompareTag("Player"))
+        {
+            GameManager.Instance.playerStats.TakeDamage(enemy.CurrentDamage);
+            Debug.Log($"{name} aplicó {enemy.CurrentDamage} daño al jugador");
+        }
+    }
+
+    void Shoot(Transform attackTarget)
     {
         if (projectilePrefab == null || firePoint == null) return;
 
-        // mirar al player antes de disparar
-        Vector3 dir = (mov.target.position - firePoint.position).normalized;
+        Vector3 dir = (attackTarget.position - firePoint.position).normalized;
         firePoint.rotation = Quaternion.LookRotation(dir);
 
         GameObject bullet = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         EnemyProjectile proj = bullet.GetComponent<EnemyProjectile>();
-        proj.damage = enemy.damage;
-        proj.speed = projectileSpeed;
+
+        if (proj != null)
+        {
+            proj.damage = enemy.CurrentDamage;
+            proj.speed = projectileSpeed;
+            proj.SetTarget(attackTarget);
+            Debug.Log($"{name} disparó un proyectil al jugador");
+        }
     }
 }

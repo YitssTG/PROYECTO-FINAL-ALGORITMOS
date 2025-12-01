@@ -4,12 +4,11 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyMovement : MonoBehaviour
 {
-    public Transform target;
+    [HideInInspector] public Transform target;
 
-    [Header("Rangos y Velocidad")]
-    public float detectionRadius = 20f;
-    public float attackRadius = 15f;
-    public float speed = 3.5f;
+    [HideInInspector] public float detectionRadius = 20f;
+    [HideInInspector] public float attackRadius = 15f;
+    [HideInInspector] public float speed = 3.5f;
 
     private NavMeshAgent agent;
 
@@ -28,7 +27,6 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
-        // Si tiene destino pero no target → caminar
         if (target == null && hasWalkDestination)
         {
             WalkToDestination();
@@ -61,7 +59,6 @@ public class EnemyMovement : MonoBehaviour
 
             case State.Attacking:
                 agent.isStopped = true;
-                LookAtTarget();
                 break;
 
             case State.Walking:
@@ -74,21 +71,6 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    private void LookAtTarget()
-    {
-        if (target == null) return;
-
-        Vector3 dir = (target.position - transform.position).normalized;
-        dir.y = 0;
-
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            Quaternion.LookRotation(dir),
-            Time.deltaTime * 8f
-        );
-    }
-
-    // ⭐⭐ ESTE ES EL MÉTODO QUE TU SPAWNER LLAMA ⭐⭐
     public void SetWalkDestination(Vector3 destination)
     {
         walkDestination = destination;
@@ -101,30 +83,12 @@ public class EnemyMovement : MonoBehaviour
     private void WalkToDestination()
     {
         if (!hasWalkDestination) return;
-
         agent.isStopped = false;
         agent.SetDestination(walkDestination);
     }
 
-    // ⭐⭐ ESTE ES movement.Die() QUE LLAMA EnemyBase.Die() ⭐⭐
     public void Die()
     {
         Destroy(gameObject);
-    }
-
-    // ⭐ GIZMOS
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRadius);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRadius);
-
-        if (hasWalkDestination)
-        {
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(transform.position, walkDestination);
-        }
     }
 }

@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1068584381949300312}
   - component: {fileID: -6135586191335005693}
   - component: {fileID: 2609277137613607605}
+  - component: {fileID: 1503620967419815396}
   m_Layer: 3
   m_Name: EnemyDistance
   m_TagString: Untagged
@@ -125,12 +126,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444aefb33a8f09f42bcd04c85bbd37fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyData: {fileID: 11400000, guid: ba8c25a06597f1f47b38d2afd6451570, type: 2}
+  currentHealth: 0
+  currentDamage: 0
   enemyName: 
-  health: 15
   damage: 2
   rewardXP: 50
   rewardGold: 100
-  movement: {fileID: 1068584381949300312}
+  optimalRange: 8
+  fleeDistance: 3
 --- !u!114 &1068584381949300312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,6 +190,18 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1503620967419815396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376029704300002237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6018e1403c4e8449aafef24074f5157, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3204253786764122168
 GameObject:
   m_ObjectHideFlags: 0

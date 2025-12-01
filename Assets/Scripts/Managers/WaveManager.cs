@@ -6,100 +6,86 @@ public class WaveManager : MonoBehaviour
 {
     [Header("Tiempos de fases")]
     public float preparationTime = 15f;
-    public float waveDuration = 60f;
 
-    [Header("Generadores de enemigos")]
+    [Header("Spawners")]
     public EnemySpawner[] spawners;
 
-    [Header("UI del tiempo")]
+    [Header("UI")]
     public TextMeshProUGUI timerText;
 
-    [Header("Dificultad")]
-    public int incrementoPorOleada = 2;
-
-    [Header("Mini Jefe")]
-    public GameObject miniJefePrefab;
-    public Transform puntoMiniJefe;
-    public int oleadaMiniJefe = 3;
-    public int frecuenciaMiniJefe = 3;
-
-    private bool isWaveActive = false;
-    private float timer;
     private int currentWave = 0;
+    private int maxWaves = 3;
+    private bool isWaveActive = false;
 
     void Start()
     {
-        // ✅ CORREGIDO: Inicializar a través de GameManager
-        if (GameManager.Instance != null)
-        {
-            StartCoroutine(WaveRoutine());
-        }
+        StartCoroutine(WaveRoutine());
     }
 
-    IEnumerator WaveRoutine()
+    private IEnumerator WaveRoutine()
     {
-        while (true)
+        while (currentWave < maxWaves)
         {
-            // PREPARACIÓN
-            isWaveActive = false;
+            // --- PREPARACIÓN ---
             currentWave++;
-            Debug.Log($"Preparación antes de la oleada {currentWave}");
+            float prepTimer = preparationTime;
+            UpdateTimerUI("PREPARACIÓN", prepTimer, true);
 
-            SetSpawnersActive(false);
-
-            timer = preparationTime;
-            while (timer > 0)
+            while (prepTimer > 0)
             {
-                UpdateTimerUI("PREPARACIÓN", timer);
-                timer -= Time.deltaTime;
+                prepTimer -= Time.deltaTime;
+                UpdateTimerUI("PREPARACIÓN", prepTimer, true);
                 yield return null;
             }
 
-            // INICIA OLEADA
+            // --- INICIO DE OLEADA ---
             isWaveActive = true;
             Debug.Log($"🔥 Comienza la oleada {currentWave}");
 
-            // Actualizar dificultad SOLO AQUÍ
+            // Activar spawners
             for (int i = 0; i < spawners.Length; i++)
             {
-                if (spawners[i] != null)
-                    spawners[i].ActualizarDificultad(currentWave, incrementoPorOleada);
+                spawners[i].SetActive(true);
+                spawners[i].ActualizarDificultad(currentWave);
+                StartCoroutine(spawners[i].SpawnOleada(currentWave));
             }
 
-            SetSpawnersActive(true);
-
-            timer = waveDuration;
-            while (timer > 0)
+            // --- DURANTE OLEADA: contar enemigos y tiempo ---
+            float waveTimer = 0f;
+            while (EnemyManager.Instance.GetEnemigosVivosCount() > 0)
             {
-                UpdateTimerUI("OLEADA", timer);
-                timer -= Time.deltaTime;
+                waveTimer += Time.deltaTime;
+                UpdateTimerUI("OLEADA", waveTimer, false);
                 yield return null;
             }
 
-            // FIN OLEADA
-            Debug.Log($"Oleada {currentWave} finalizada");
-            SetSpawnersActive(false);
+            isWaveActive = false;
+            Debug.Log($"✅ Oleada {currentWave} finalizada");
+
+            // Desactivar spawners
+            for (int i = 0; i < spawners.Length; i++)
+                spawners[i].SetActive(false);
+
+            yield return null;
         }
+
+        Debug.Log("🎉 ¡GANASTE! Todas las oleadas completadas.");
+        if (timerText != null) timerText.text = "🎉 GANASTE 🎉";
     }
 
-    private void SetSpawnersActive(bool active)
+    private void UpdateTimerUI(string fase, float tiempo, bool countdown)
     {
-        if (spawners == null) return;
+        if (timerText == null) return;
 
-        for (int i = 0; i < spawners.Length; i++)
+        if (countdown)
         {
-            if (spawners[i] != null)
-                spawners[i].SetActive(active);
+            int segundos = Mathf.CeilToInt(tiempo);
+            timerText.text = $"{fase} {currentWave}\n{segundos:00}s";
         }
-    }
-
-    private void UpdateTimerUI(string fase, float tiempo)
-    {
-        if (timerText != null)
+        else
         {
-            int minutos = Mathf.FloorToInt(tiempo / 60);
-            int segundos = Mathf.FloorToInt(tiempo % 60);
-            timerText.text = $"{fase} {currentWave}\n{minutos:00}:{segundos:00}";
+            int segundos = Mathf.FloorToInt(tiempo);
+            timerText.text = $"{fase} {currentWave}\n{segundos:00}s";
         }
     }
 

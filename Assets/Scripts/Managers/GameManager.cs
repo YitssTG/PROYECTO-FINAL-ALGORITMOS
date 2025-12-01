@@ -27,14 +27,10 @@ public class GameManager : MonoBehaviour
     public ItemManager itemManager;
     public InventoryManager inventoryManager;
 
-    [Header("UI Systems")]
-    public ShopUI shopUI;
-    public ItemGraphUI attackGraphUI;
-    public ItemGraphUI defenseGraphUI;
-    public ItemGraphUI speedGraphUI;
-
     void Awake()
     {
+        Debug.Log("GAME MANAGER AWAKE");
+
         if (Instance == null)
         {
             Instance = this;
@@ -52,25 +48,30 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("✅ GameManager Start completado");
+        Debug.Log("GAME MANAGER INICIALIZADO CORRECTAMENTE");
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         EventManager.OnEnemyDefeated += OnEnemyDead;
         EventManager.OnCoinsCollected += OnCoinsAdded;
+        EventManager.OnWaveStarted += OnWaveStarted;
+        EventManager.OnWaveCompleted += OnWaveCompleted;
+        EventManager.OnPlayerDied += OnPlayerDied; // ⭐ NUEVO
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         EventManager.OnEnemyDefeated -= OnEnemyDead;
         EventManager.OnCoinsCollected -= OnCoinsAdded;
+        EventManager.OnWaveStarted -= OnWaveStarted;
+        EventManager.OnWaveCompleted -= OnWaveCompleted;
+        EventManager.OnPlayerDied -= OnPlayerDied; // ⭐ NUEVO
     }
 
     #region Verificación de Referencias
     private void VerificarReferencias()
     {
-        // Sistemas principales
         if (abilitySystem == null)
             Debug.LogWarning("⚠️ AbilitySystem no está asignado en GameManager.");
 
@@ -86,7 +87,6 @@ public class GameManager : MonoBehaviour
         if (waveManager == null)
             Debug.LogWarning("⚠️ WaveManager no está asignado en GameManager.");
 
-        // Managers
         if (abilityManager == null)
             Debug.LogWarning("⚠️ AbilityManager no asignado en GameManager.");
 
@@ -99,20 +99,6 @@ public class GameManager : MonoBehaviour
         if (inventoryManager == null)
             Debug.LogWarning("⚠️ InventoryManager no asignado en GameManager.");
 
-        // UI Systems
-        if (shopUI == null)
-            Debug.LogWarning("⚠️ ShopUI no asignado en GameManager.");
-
-        if (attackGraphUI == null)
-            Debug.LogWarning("⚠️ AttackGraphUI no asignado en GameManager.");
-
-        if (defenseGraphUI == null)
-            Debug.LogWarning("⚠️ DefenseGraphUI no asignado en GameManager.");
-
-        if (speedGraphUI == null)
-            Debug.LogWarning("⚠️ SpeedGraphUI no asignado en GameManager.");
-
-        // Configuraciones
         if (towerSOList == null || towerSOList.Length == 0)
             Debug.LogWarning("⚠️ No hay torretas configuradas en GameManager.");
     }
@@ -122,23 +108,37 @@ public class GameManager : MonoBehaviour
     private void OnEnemyDead()
     {
         enemigosDerrotados++;
-
-        if (playerStats != null)
-            playerStats.AddExperience(25);
-
+        playerStats?.AddExperience(25);  // Se asegura de que playerStats no sea nulo
         Debug.Log($"GameManager: Enemigo derrotado. Total: {enemigosDerrotados}");
     }
 
     private void OnCoinsAdded(int amount)
     {
         monedasTotales += amount;
+        goldManager?.AddGold(amount);  // Si goldManager no es nulo, agrega el oro
+        Debug.Log($"GameManager: +{amount} monedas. Total: {monedasTotales}");
+    }
 
+    private void OnWaveStarted(int waveNumber)
+    {
+        Debug.Log($"🎯 GameManager: Oleada {waveNumber} iniciada");
+    }
+
+    private void OnWaveCompleted(int waveNumber)
+    {
+        Debug.Log($"🎉 GameManager: Oleada {waveNumber} completada");
         if (goldManager != null)
         {
-            goldManager.AddGold(amount);
+            int recompensa = waveNumber * 50;
+            goldManager.AddGold(recompensa);
+            Debug.Log($"💰 Recompensa de oleada: +{recompensa} oro");
         }
+    }
 
-        Debug.Log($"GameManager: +{amount} monedas. Total: {monedasTotales}");
+    private void OnPlayerDied()
+    {
+        Debug.Log("💀 GameManager: Player murió - Game Over");
+        // Aquí puedes agregar lógica para el fin del juego, pausar el juego, etc.
     }
     #endregion
 
@@ -189,6 +189,7 @@ public class GameManager : MonoBehaviour
             Debug.Log($"No tienes suficiente oro para {selectedTower.name}. Costo: {selectedTower.cost}");
         }
     }
+
     public bool CanBuild()
     {
         TowerSO selectedTower = GetSelectedTowerSO();
@@ -267,7 +268,6 @@ public class GameManager : MonoBehaviour
             shopManager.goldManager = goldManager;
             shopManager.inventoryManager = inventoryManager;
             shopManager.playerStats = playerStats;
-            shopManager.shopUI = shopUI;
 
             if (HasInitializeMethod(shopManager))
             {
@@ -278,30 +278,6 @@ public class GameManager : MonoBehaviour
             {
                 Debug.Log("ShopManager configurado con dependencias");
             }
-        }
-
-        if (shopUI != null)
-        {
-            shopUI.SetManagerReferences(shopManager, itemManager, goldManager);
-            Debug.Log("✅ ShopUI configurado con referencias de managers");
-        }
-
-        if (attackGraphUI != null)
-        {
-            attackGraphUI.graphType = "Attack";
-            Debug.Log("✅ AttackGraphUI configurado");
-        }
-
-        if (defenseGraphUI != null)
-        {
-            defenseGraphUI.graphType = "Defense";
-            Debug.Log("✅ DefenseGraphUI configurado");
-        }
-
-        if (speedGraphUI != null)
-        {
-            speedGraphUI.graphType = "Speed";
-            Debug.Log("✅ SpeedGraphUI configurado");
         }
 
         if (goldManager != null)
@@ -319,7 +295,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    #region Sistema de Tienda (SIMPLIFICADO - Sin reflexión)
+    #region Sistema de Tienda
     public void ToggleShop()
     {
         if (shopManager != null)
@@ -354,9 +330,7 @@ public class GameManager : MonoBehaviour
         if (item == null) return false;
 
         bool canPurchaseFromItemManager = itemManager != null && itemManager.CanPurchaseItem(item);
-
         bool hasEnoughGold = goldManager != null && goldManager.currentGold >= item.cost;
-
         bool notPurchased = !item.isPurchased;
 
         bool finalResult = canPurchaseFromItemManager && hasEnoughGold && notPurchased;

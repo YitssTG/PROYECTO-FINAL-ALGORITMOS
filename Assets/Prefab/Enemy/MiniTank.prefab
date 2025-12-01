@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: -3918165643155545661}
   - component: {fileID: 5273494264417635600}
   - component: {fileID: 8179229096416584705}
+  - component: {fileID: 9005917534367452631}
   m_Layer: 3
   m_Name: MiniTank
   m_TagString: Untagged
@@ -126,12 +127,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f999603f013ccd04eae6ba22cee2b587, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyData: {fileID: 11400000, guid: 0088142be6bc0a543ab6c61bc79b212f, type: 2}
+  currentHealth: 0
+  currentDamage: 0
   enemyName: 
-  health: 25
   damage: 5
   rewardXP: 50
   rewardGold: 20
-  movement: {fileID: -3918165643155545661}
+  armor: 10
+  slowAuraRadius: 5
 --- !u!114 &-3918165643155545661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,3 +191,15 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &9005917534367452631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974820351747600714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6018e1403c4e8449aafef24074f5157, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

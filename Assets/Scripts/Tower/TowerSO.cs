@@ -4,7 +4,7 @@ using UnityEngine;
 public class TowerSO : ScriptableObject
 {
     public string towerName;
-    public int cost;  
+    public int cost;
     public float damage;
     public float range;
     public GameObject towerPrefab;
