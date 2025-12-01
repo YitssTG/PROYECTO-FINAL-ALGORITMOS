@@ -18,7 +18,7 @@ MonoBehaviour:
   baseDamage: 20
   moveSpeed: 4
   attackSpeed: 1.2
-  detectionRadius: 12
+  detectionRadius: 8
   attackRadius: 2
   rewardXP: 40
   rewardGold: 15

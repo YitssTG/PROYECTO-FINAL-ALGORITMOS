@@ -10,7 +10,7 @@ public class ShopController : MonoBehaviour
 
     private void HandleInput()
     {
-        if (Keyboard.current.tKey.wasPressedThisFrame)
+        if (Keyboard.current.tabKey.wasPressedThisFrame)
         {
             ToggleShop();
         }

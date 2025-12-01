@@ -22,6 +22,6 @@ MonoBehaviour:
   meteorDelay: 1.5
   meteorRadius: 4
   abilityName: Dash
-  cooldown: 2
+  cooldown: 25
   maxLevel: 5
   locked: 0

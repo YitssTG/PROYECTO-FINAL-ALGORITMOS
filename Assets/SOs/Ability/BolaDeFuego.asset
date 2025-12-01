@@ -15,13 +15,13 @@ MonoBehaviour:
   range: 15
   projectileSpeed: 20
   explosionRadius: 2
-  damageBase: 1
-  damagePerLevel: 2
+  damageBase: 10
+  damagePerLevel: 5
   duration: 3
   dashDistance: 6
   meteorDelay: 1.5
   meteorRadius: 20
   abilityName: Bola de Fuego
-  cooldown: 2
+  cooldown: 20
   maxLevel: 5
   locked: 0

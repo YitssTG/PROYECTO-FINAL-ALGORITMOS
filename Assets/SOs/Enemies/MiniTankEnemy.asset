@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: MiniTank
   enemyType: 2
-  baseHealth: 250
+  baseHealth: 180
   baseDamage: 25
   moveSpeed: 2
   attackSpeed: 0.8
-  detectionRadius: 15
+  detectionRadius: 10
   attackRadius: 4
   rewardXP: 100
   rewardGold: 50

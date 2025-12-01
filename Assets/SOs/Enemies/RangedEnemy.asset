@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Ranged
   enemyType: 1
-  baseHealth: 80
+  baseHealth: 100
   baseDamage: 15
   moveSpeed: 3
   attackSpeed: 1.5
-  detectionRadius: 20
+  detectionRadius: 13
   attackRadius: 10
   rewardXP: 60
   rewardGold: 25

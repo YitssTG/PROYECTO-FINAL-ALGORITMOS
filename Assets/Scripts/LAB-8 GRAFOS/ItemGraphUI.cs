@@ -15,21 +15,21 @@ public class ItemGraphUI : MonoBehaviour
     [Header("Tipo de gráfico")]
     public string graphType; // "Attack", "Defense", "Speed"
 
-    public Dictionary<ItemData, ItemNodeUI> nodeLookup { get; private set; } = new Dictionary<ItemData, ItemNodeUI>();
+    [Header("Referencia a ShopUI (ASIGNADA DESDE ShopUI)")]
+    public ShopUI shopUI;
 
+    public Dictionary<ItemData, ItemNodeUI> nodeLookup { get; private set; } = new Dictionary<ItemData, ItemNodeUI>();
     private List<ItemData> itemsToDisplay = new List<ItemData>();
 
-    // Propiedad estática corregida
     public static ItemGraphUI ActiveGraph { get; set; }
 
     private void Start()
     {
-        RefreshGraph();
+        // No generar nada automáticamente
     }
 
     public void RefreshGraph()
     {
-        // Limpiar contenedor
         if (container != null)
         {
             foreach (Transform child in container)
@@ -39,12 +39,10 @@ public class ItemGraphUI : MonoBehaviour
         nodeLookup.Clear();
         itemsToDisplay.Clear();
 
-        // Obtener items del tipo correspondiente
         if (ItemManager.Instance != null)
         {
             foreach (var item in ItemManager.Instance.allItems)
             {
-                // Filtrar por tipo de gráfico basado en los bonos
                 if (ShouldDisplayInThisGraph(item))
                 {
                     itemsToDisplay.Add(item);
@@ -52,7 +50,6 @@ public class ItemGraphUI : MonoBehaviour
             }
         }
 
-        // Construir gráfico visual
         BuildVisualGraph();
     }
 
@@ -73,7 +70,6 @@ public class ItemGraphUI : MonoBehaviour
     {
         if (nodePrefab == null || container == null) return;
 
-        // Crear nodos visuales
         foreach (var item in itemsToDisplay)
         {
             GameObject nodeGO = Instantiate(nodePrefab, container);
@@ -85,13 +81,11 @@ public class ItemGraphUI : MonoBehaviour
             }
         }
 
-        // Posicionar nodos
         ArrangeTreeLayout();
     }
 
     private void ArrangeTreeLayout()
     {
-        // Encontrar raíces (items sin requerimientos)
         List<ItemData> roots = itemsToDisplay.FindAll(i =>
             i.requiredItems == null || i.requiredItems.Length == 0);
 
@@ -110,7 +104,6 @@ public class ItemGraphUI : MonoBehaviour
         if (rt != null)
             rt.anchoredPosition = pos;
 
-        // Encontrar hijos
         var children = GetChildren(item);
         if (children.Count == 0) return;
 
@@ -149,8 +142,6 @@ public class ItemGraphUI : MonoBehaviour
 
     public void OnItemSelected(ItemData item)
     {
-        // Buscar ShopUI en lugar de usar Instance
-        ShopUI shopUI = FindObjectOfType<ShopUI>();
         if (shopUI != null)
         {
             shopUI.SelectItem(item);
