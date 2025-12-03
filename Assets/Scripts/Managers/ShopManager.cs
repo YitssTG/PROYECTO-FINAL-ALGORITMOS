@@ -1,166 +1,171 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
+using System.Text;
 
 public class ShopManager : MonoBehaviour
 {
-    [Header("Dependencies")]
     public ItemManager itemManager;
     public GoldManager goldManager;
     public InventoryManager inventoryManager;
     public PlayerStats playerStats;
     public ShopUI shopUI;
+    public GameObject shopPanel;
 
     private bool isShopOpen = false;
 
+    public UnityEvent<ItemData> OnItemPurchased = new UnityEvent<ItemData>();
+
     public void Initialize()
     {
-        Debug.Log("✅ ShopManager inicializado");
+        Debug.Log("ShopManager Inicializado");
+    }
+
+    public bool IsShopOpen()
+    {
+        return shopPanel != null && shopPanel.activeSelf;
     }
 
     public void ToggleShop()
     {
-        isShopOpen = !isShopOpen;
+        if (shopPanel == null)
+        {
+            Debug.LogWarning("ShopManager.ToggleShop: shopPanel no asignado");
+            isShopOpen = !isShopOpen;
+            return;
+        }
+
+        bool newState = !shopPanel.activeSelf;
+        shopPanel.SetActive(newState);
+        isShopOpen = newState;
 
         if (shopUI != null)
         {
-            if (isShopOpen)
-            {
-                shopUI.OpenShop();
-                Debug.Log("🛒 Tienda abierta");
-            }
-            else
-            {
-                shopUI.CloseShop();
-                Debug.Log("🛒 Tienda cerrada");
-            }
+            if (newState) shopUI.OpenShop();
+            else shopUI.CloseShop();
         }
     }
 
-    public void PurchaseItem(ItemData item)
-    {
-        if (item == null)
-        {
-            Debug.LogWarning("❌ Item nulo, no se puede comprar");
-            return;
-        }
-
-        Debug.Log($"🛒 Intentando comprar: {item.itemName} por {item.cost} oro");
-
-        // 1. Verificar si se puede comprar
-        if (!CanPurchaseItem(item))
-        {
-            Debug.LogWarning($"❌ No se puede comprar {item.itemName}");
-            return;
-        }
-
-        // 2. Gastar oro (VERIFICAR QUE SE DESCUEENTE)
-        if (goldManager != null)
-        {
-            bool spentGold = goldManager.SpendGold(item.cost);
-            Debug.Log($"💰 Gastar oro: {item.cost} - Resultado: {spentGold} - Oro restante: {goldManager.currentGold}");
-
-            if (!spentGold)
-            {
-                Debug.LogError("❌ No se pudo gastar el oro");
-                return;
-            }
-        }
-        else
-        {
-            Debug.LogError("❌ GoldManager no disponible");
-            return;
-        }
-
-        // 3. Marcar item como comprado
-        if (itemManager != null)
-        {
-            itemManager.PurchaseItem(item);
-            Debug.Log($"✅ {item.itemName} marcado como comprado");
-        }
-
-        // 4. Agregar al inventario
-        if (inventoryManager != null)
-        {
-            inventoryManager.AddItem(item);
-            Debug.Log($"🎒 {item.itemName} agregado al inventario");
-        }
-
-        // 5. Aplicar estadísticas al jugador
-        ApplyItemStatsToPlayer(item);
-
-        // 6. Actualizar UI
-        if (shopUI != null)
-        {
-            shopUI.RefreshUI();
-            Debug.Log("🔄 UI actualizada después de compra");
-        }
-
-        Debug.Log($"✅ COMPRA EXITOSA: {item.itemName} comprado por {item.cost} oro");
-    }
-
-    private bool CanPurchaseItem(ItemData item)
+    public bool CanPurchase(ItemData item)
     {
         if (item == null) return false;
 
-        bool canPurchase = true;
+        if (item.isPurchased) return false;
 
-        // Verificar si ya está comprado
-        if (item.isPurchased)
+        if (itemManager == null)
         {
-            Debug.Log($"❌ {item.itemName} ya está comprado");
+            Debug.LogWarning("ShopManager.CanPurchase: ItemManager no asignado");
             return false;
         }
 
-        // Verificar con ItemManager
-        if (itemManager != null)
+        if (!itemManager.CanPurchaseItem(item)) return false;
+
+        if (goldManager == null)
         {
-            canPurchase = itemManager.CanPurchaseItem(item);
-            if (!canPurchase) Debug.Log($"❌ ItemManager dice que no se puede comprar {item.itemName}");
+            Debug.LogWarning("ShopManager.CanPurchase: GoldManager no asignado");
+            return false;
         }
 
-        // Verificar oro
-        if (goldManager != null)
-        {
-            bool hasEnoughGold = goldManager.currentGold >= item.cost;
-            if (!hasEnoughGold) Debug.Log($"❌ Oro insuficiente: {goldManager.currentGold}/{item.cost}");
-            canPurchase = canPurchase && hasEnoughGold;
-        }
+        if (goldManager.currentGold < item.cost) return false;
 
-        Debug.Log($"🔍 {item.itemName} - Puede comprar: {canPurchase}");
-        return canPurchase;
+        return true;
     }
 
-    private void ApplyItemStatsToPlayer(ItemData item)
+    public bool PurchaseItem(ItemData item)
     {
-        if (playerStats != null && item != null)
+        if (item == null)
         {
-            Debug.Log($"🎯 Aplicando estadísticas de {item.itemName} al jugador");
-
-            // Aplicar bonos del item
-            if (item.bonusDamage > 0)
-            {
-                playerStats.IncreaseDamage(item.bonusDamage);
-                Debug.Log($"⚔️ Daño aumentado: +{item.bonusDamage}");
-            }
-
-            if (item.bonusArmor > 0)
-            {
-                playerStats.IncreaseArmor(item.bonusArmor);
-                Debug.Log($"🛡️ Armadura aumentada: +{item.bonusArmor}");
-            }
-
-            if (item.bonusSpeed > 0)
-            {
-                playerStats.IncreaseSpeed(item.bonusSpeed);
-                Debug.Log($"🏃 Velocidad aumentada: +{item.bonusSpeed}");
-            }
-
-            Debug.Log($"📊 Estadísticas finales - Daño: {playerStats.CurrentDamage}, Armadura: {playerStats.CurrentArmor}, Velocidad: {playerStats.CurrentSpeed}");
+            Debug.LogWarning("PurchaseItem: item nulo");
+            return false;
         }
+
+        if (!CanPurchase(item))
+        {
+            Debug.Log("PurchaseItem: no se puede comprar " + item.itemName);
+            return false;
+        }
+
+        if (goldManager == null)
+        {
+            Debug.LogWarning("PurchaseItem: GoldManager no asignado");
+            return false;
+        }
+
+        bool spent = goldManager.SpendGold(item.cost);
+        if (!spent)
+        {
+            Debug.LogWarning("PurchaseItem: no se pudo gastar el oro");
+            return false;
+        }
+
+        if (itemManager == null)
+        {
+            Debug.LogWarning("PurchaseItem: ItemManager no asignado");
+            return false;
+        }
+
+        itemManager.PurchaseItem(item);
+
+        if (inventoryManager != null)
+            inventoryManager.AddItem(item);
         else
-        {
-            Debug.LogWarning("❌ No se pudo aplicar estadísticas: PlayerStats o Item nulo");
-        }
+            Debug.LogWarning("PurchaseItem: InventoryManager no asignado - no se agregó al inventario");
+
+        ApplyStats(item);
+
+        // Notificar via evento
+        OnItemPurchased?.Invoke(item);
+
+        // Refrescar UI si está asignada
+        if (shopUI != null)
+            shopUI.RefreshUI();
+
+        Debug.Log("PurchaseItem: compra exitosa " + item.itemName);
+        return true;
     }
 
-    public bool IsShopOpen() => isShopOpen;
+    private void ApplyStats(ItemData item)
+    {
+        if (playerStats == null || item == null) return;
+
+        if (item.bonusDamage > 0) playerStats.IncreaseDamage(item.bonusDamage);
+        if (item.bonusArmor > 0) playerStats.IncreaseArmor(item.bonusArmor);
+        if (item.bonusSpeed > 0) playerStats.IncreaseSpeed(item.bonusSpeed);
+    }
+
+    public string GetItemInfo(ItemData item)
+    {
+        if (item == null) return "Selecciona un ítem para ver detalles.";
+
+        string estado;
+        if (item.isPurchased) estado = "Comprado";
+        else if (item.isUnlocked) estado = "Disponible";
+        else estado = "Bloqueado";
+
+        var sb = new StringBuilder();
+        sb.AppendLine(item.itemName);
+        sb.AppendLine();
+        sb.AppendLine(item.description);
+        sb.AppendLine();
+        sb.AppendLine($"Costo: {item.cost}G");
+        sb.AppendLine($"Estado: {estado}");
+        sb.AppendLine();
+
+        if (item.bonusDamage > 0) sb.AppendLine($"Daño: +{item.bonusDamage}");
+        if (item.bonusArmor > 0) sb.AppendLine($"Armadura: +{item.bonusArmor}");
+        if (item.bonusSpeed > 0) sb.AppendLine($"Velocidad: +{item.bonusSpeed}");
+
+        if (item.requiredItems != null && item.requiredItems.Length > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("Requisitos:");
+            foreach (var req in item.requiredItems)
+            {
+                if (req == null) continue;
+                string estadoReq = req.isPurchased ? "(Listo)" : "(Falta)";
+                sb.AppendLine($"{req.itemName} {estadoReq}");
+            }
+        }
+
+        return sb.ToString();
+    }
 }

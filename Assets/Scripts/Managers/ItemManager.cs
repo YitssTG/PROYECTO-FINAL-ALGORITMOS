@@ -5,146 +5,233 @@ public class ItemManager : MonoBehaviour
 {
     public static ItemManager Instance { get; private set; }
 
-    [Header("Todos los items del juego")]
+    [Header("Items por Categoría")]
+    public List<ItemData> attackItems = new List<ItemData>();
+    public List<ItemData> defenseItems = new List<ItemData>();
+    public List<ItemData> speedItems = new List<ItemData>();
+
+    [Header("Todos los ítems combinados (solo lectura)")]
     public List<ItemData> allItems = new List<ItemData>();
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
+
+        RebuildAllItemsList();
+    }
+
+    private void RebuildAllItemsList()
+    {
+        HashSet<ItemData> unique = new HashSet<ItemData>();
+
+        AddListToHash(unique, attackItems);
+        AddListToHash(unique, defenseItems);
+        AddListToHash(unique, speedItems);
+
+        allItems = new List<ItemData>(unique);
+    }
+
+    private void AddListToHash(HashSet<ItemData> hash, List<ItemData> list)
+    {
+        for (int i = 0; i < list.Count; i++)
         {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
+            if (list[i] != null)
+                hash.Add(list[i]);
         }
     }
 
     public void Initialize()
     {
         InitializeItemStates();
-        Debug.Log($"✅ ItemManager inicializado con {allItems.Count} items");
     }
 
     private void InitializeItemStates()
     {
-        foreach (var item in allItems)
+        for (int i = 0; i < allItems.Count; i++)
         {
-            if (item != null)
-            {
-                // Items sin requerimientos empiezan desbloqueados
-                item.isUnlocked = item.requiredItems == null || item.requiredItems.Length == 0;
-                item.isPurchased = false;
+            ItemData item = allItems[i];
+            if (item == null) continue;
 
-                Debug.Log($"🔧 {item.itemName} - Unlocked: {item.isUnlocked}, Purchased: {item.isPurchased}");
-            }
+            item.isPurchased = false;
+            item.isUnlocked = item.requiredItems == null || item.requiredItems.Length == 0;
         }
     }
 
     public bool CanPurchaseItem(ItemData item)
     {
-        if (item == null)
-        {
-            Debug.LogWarning("❌ Item nulo en CanPurchaseItem");
-            return false;
-        }
+        if (item == null) return false;
+        if (!item.isUnlocked) return false;
+        if (item.isPurchased) return false;
 
-        bool canPurchase = item.isUnlocked && !item.isPurchased;
-
-        // Verificar requerimientos
-        if (item.requiredItems != null && item.requiredItems.Length > 0)
+        if (item.requiredItems != null)
         {
-            foreach (var req in item.requiredItems)
+            for (int i = 0; i < item.requiredItems.Length; i++)
             {
+                ItemData req = item.requiredItems[i];
                 if (req != null && !req.isPurchased)
-                {
-                    canPurchase = false;
-                    break;
-                }
+                    return false;
             }
         }
 
-        Debug.Log($"🔍 {item.itemName} - CanPurchase: {canPurchase} (Unlocked: {item.isUnlocked}, Purchased: {item.isPurchased})");
-        return canPurchase;
+        return true;
     }
 
     public void PurchaseItem(ItemData item)
     {
-        if (item != null && CanPurchaseItem(item))
-        {
-            item.isPurchased = true;
+        if (item == null) return;
+        if (!CanPurchaseItem(item)) return;
 
-            // Desbloquear items que dependen de este
-            UnlockDependentItems(item);
-
-            Debug.Log($"🛍️ {item.itemName} marcado como comprado");
-        }
-        else
-        {
-            Debug.LogWarning($"❌ No se pudo comprar {item.itemName}");
-        }
+        item.isPurchased = true;
+        UnlockDependents(item);
     }
 
-    private void UnlockDependentItems(ItemData purchasedItem)
+    private void UnlockDependents(ItemData purchased)
     {
-        int unlockedCount = 0;
-
-        foreach (var item in allItems)
+        for (int i = 0; i < allItems.Count; i++)
         {
-            if (item != null && item.requiredItems != null && !item.isUnlocked)
+            ItemData item = allItems[i];
+            if (item == null) continue;
+
+            if (item.isUnlocked) continue;
+            if (item.requiredItems == null) continue;
+
+            bool ok = true;
+            for (int r = 0; r < item.requiredItems.Length; r++)
             {
-                bool allRequirementsMet = true;
-
-                foreach (var req in item.requiredItems)
+                ItemData req = item.requiredItems[r];
+                if (req != null && !req.isPurchased)
                 {
-                    if (req == purchasedItem && !req.isPurchased)
-                    {
-                        allRequirementsMet = false;
-                        break;
-                    }
-                }
-
-                if (allRequirementsMet)
-                {
-                    item.isUnlocked = true;
-                    unlockedCount++;
-                    Debug.Log($"🔓 {item.itemName} desbloqueado por comprar {purchasedItem.itemName}");
+                    ok = false;
+                    break;
                 }
             }
-        }
 
-        if (unlockedCount > 0)
-        {
-            Debug.Log($"🎯 {unlockedCount} items desbloqueados tras comprar {purchasedItem.itemName}");
+            if (ok) item.isUnlocked = true;
         }
     }
 
     public void ResetAllItems()
     {
-        foreach (var item in allItems)
+        for (int i = 0; i < allItems.Count; i++)
         {
-            if (item != null)
-            {
-                item.isPurchased = false;
-                item.isUnlocked = item.requiredItems == null || item.requiredItems.Length == 0;
-            }
+            ItemData item = allItems[i];
+            if (item == null) continue;
+
+            item.isPurchased = false;
+            item.isUnlocked = item.requiredItems == null || item.requiredItems.Length == 0;
         }
-        Debug.Log("🔄 Todos los items reiniciados");
+    }
+    public List<ItemData> GetItemsForGraph(string type)
+    {
+        List<ItemData> list;
+
+        switch (type.ToLower())
+        {
+            case "attack":
+                list = attackItems;
+                break;
+
+            case "defense":
+                list = defenseItems;
+                break;
+
+            case "speed":
+                list = speedItems;
+                break;
+
+            default:
+                list = allItems;
+                break;
+        }
+
+        // LA SOLUCIÓN:
+        // 1. Filtrar nulls
+        // 2. Eliminar repetidos
+        // 3. Crear lista final limpia
+        HashSet<ItemData> unique = new HashSet<ItemData>();
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] != null)
+                unique.Add(list[i]);
+        }
+
+        return new List<ItemData>(unique);
     }
 
-    // Método para debuggear conexiones
-    public void DebugItemConnections()
+    public List<ItemData> GetRootItems(List<ItemData> items)
     {
-        Debug.Log("🔗 CONEXIONES ENTRE ITEMS:");
-        foreach (var item in allItems)
-        {
-            if (item != null)
-            {
-                string requirements = item.requiredItems != null ?
-                    string.Join(", ", System.Array.ConvertAll(item.requiredItems, x => x?.itemName)) : "Ninguno";
+        List<ItemData> roots = new List<ItemData>();
 
-                Debug.Log($"   {item.itemName} → Requiere: [{requirements}] | Unlocked: {item.isUnlocked} | Purchased: {item.isPurchased}");
+        for (int i = 0; i < items.Count; i++)
+        {
+            ItemData item = items[i];
+            if (item.requiredItems == null || item.requiredItems.Length == 0)
+                roots.Add(item);
+        }
+
+        return roots;
+    }
+    public List<ItemData> GetChildren(ItemData parent, List<ItemData> items)
+    {
+        List<ItemData> list = new List<ItemData>();
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            ItemData item = items[i];
+            if (item == null) continue;
+            if (item.requiredItems == null) continue;
+
+            for (int r = 0; r < item.requiredItems.Length; r++)
+            {
+                if (item.requiredItems[r] == parent)
+                {
+                    list.Add(item);
+                    break;
+                }
             }
+        }
+
+        return list;
+    }
+    public Dictionary<ItemData, Vector2> CalculateLayout(List<ItemData> items, float xSpacing, float ySpacing)
+    {
+        Dictionary<ItemData, Vector2> layout = new Dictionary<ItemData, Vector2>();
+
+        List<ItemData> roots = GetRootItems(items);
+
+        float startX = -((roots.Count - 1) * xSpacing / 2);
+
+        for (int i = 0; i < roots.Count; i++)
+        {
+            Vector2 pos = new Vector2(startX + i * xSpacing, 0);
+            SetRecursivePosition(roots[i], pos, items, layout, xSpacing, ySpacing);
+        }
+
+        return layout;
+    }
+
+    private void SetRecursivePosition(
+        ItemData item,
+        Vector2 pos,
+        List<ItemData> items,
+        Dictionary<ItemData, Vector2> layout,
+        float xSpacing,
+        float ySpacing)
+    {
+        layout[item] = pos;
+
+        List<ItemData> children = GetChildren(item, items);
+        if (children.Count == 0) return;
+
+        float totalWidth = (children.Count - 1) * xSpacing;
+        float startX = pos.x - totalWidth / 2;
+
+        for (int i = 0; i < children.Count; i++)
+        {
+            Vector2 npos = new Vector2(startX + i * xSpacing, pos.y - ySpacing);
+            SetRecursivePosition(children[i], npos, items, layout, xSpacing, ySpacing);
         }
     }
 }

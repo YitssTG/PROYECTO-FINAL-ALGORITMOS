@@ -26,7 +26,6 @@ public class ItemNodeUI : MonoBehaviour, IPointerClickHandler
         itemData = data;
         graphUI = graph;
 
-        // Configurar UI
         if (icon != null && data.icon != null)
             icon.sprite = data.icon;
 
