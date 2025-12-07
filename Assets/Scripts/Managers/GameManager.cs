@@ -29,8 +29,6 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log("GAME MANAGER AWAKE");
-
         if (Instance == null)
         {
             Instance = this;
@@ -43,11 +41,11 @@ public class GameManager : MonoBehaviour
         }
 
         InitializeManagers();
-        VerificarReferencias();
     }
 
     void Start()
     {
+        itemManager.Initialize(); 
         Debug.Log("GAME MANAGER INICIALIZADO CORRECTAMENTE");
     }
 

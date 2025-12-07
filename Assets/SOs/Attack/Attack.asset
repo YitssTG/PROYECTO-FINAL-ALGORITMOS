@@ -20,5 +20,5 @@ MonoBehaviour:
   bonusArmor: 0
   bonusSpeed: 0
   requiredItems: []
-  isUnlocked: 1
-  isPurchased: 1
+  isUnlocked: 0
+  isPurchased: 0

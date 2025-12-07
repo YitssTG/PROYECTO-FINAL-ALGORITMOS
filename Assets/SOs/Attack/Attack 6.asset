@@ -21,5 +21,5 @@ MonoBehaviour:
   bonusSpeed: 0
   requiredItems:
   - {fileID: 11400000, guid: 74aab311e867492428d9b1ab6d5bf37e, type: 2}
-  isUnlocked: 1
-  isPurchased: 1
+  isUnlocked: 0
+  isPurchased: 0

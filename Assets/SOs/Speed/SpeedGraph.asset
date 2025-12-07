@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a480071d5abb0240bda95705864306b, type: 3}
+  m_Script: {fileID: 11500000, guid: 70b97e28eb085744fb26c4a7575f83cf, type: 3}
   m_Name: SpeedGraph
   m_EditorClassIdentifier: 
   graphName: SpeedGraph

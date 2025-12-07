@@ -5911,7 +5911,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -296, y: 330}
+  m_AnchoredPosition: {x: 98, y: 330}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &223405258
@@ -5930,7 +5930,7 @@ MonoBehaviour:
   container: {fileID: 971665171}
   xSpacing: 200
   ySpacing: 160
-  graphData: {fileID: 0}
+  graphData: {fileID: 11400000, guid: 4ebf004f8f0f8784fb8a9cd0bcd8e9a1, type: 2}
   shopUI: {fileID: 1978643198}
 --- !u!1001 &223807279
 PrefabInstance:
@@ -6161,8 +6161,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7821f78e1852f8247aa9d79d92087670, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentGold: 200
-  maxGold: 1463
+  currentGold: 1000
+  maxGold: 1500
   goldText: {fileID: 122434324}
   OnGoldChanged:
     m_PersistentCalls:
@@ -6201,8 +6201,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allGraphs:
   - {fileID: 11400000, guid: 155c605c7c4680a49943f5c422f3edfc, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: e2db2a8b00e1c324185c68a656afd18a, type: 2}
+  - {fileID: 11400000, guid: 4ebf004f8f0f8784fb8a9cd0bcd8e9a1, type: 2}
 --- !u!114 &235780467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39574,7 +39574,7 @@ MonoBehaviour:
   container: {fileID: 140034258}
   xSpacing: 200
   ySpacing: 160
-  graphData: {fileID: 0}
+  graphData: {fileID: 11400000, guid: e2db2a8b00e1c324185c68a656afd18a, type: 2}
   shopUI: {fileID: 1978643198}
 --- !u!1001 &1543590296
 PrefabInstance:
