@@ -6123,6 +6123,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerSOList:
   - {fileID: 11400000, guid: 1cc39770db698a3408ad59f4cd9ca6bd, type: 2}
+  - {fileID: 11400000, guid: 38187ce1d7a0b904d9a1baa410592905, type: 2}
   abilitySystem: {fileID: 2019222672}
   playerStats: {fileID: 2019222671}
   spawners: []
@@ -6187,6 +6188,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryContainer: {fileID: 715405763}
   itemNodePrefab: {fileID: 176317527642021625, guid: 75bb838da42da6d41afdcce157f7f1d6, type: 3}
+  playerStats: {fileID: 2019222671}
 --- !u!114 &235780466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24601,6 +24603,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 79f81bb7a00364a4f851d1828817c451, type: 2}
+    - target: {fileID: 5006086956950311310, guid: c20f38a24e061f74d851d08eae23ff7d, type: 3}
+      propertyPath: slotTowerIndex
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5172916859018274612, guid: c20f38a24e061f74d851d08eae23ff7d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 118.863594
@@ -50390,6 +50396,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 05e94ae3-fa9c-4d25-94f1-4cac6ed45855
     m_ActionName: 'Player/Shift[/Keyboard/shift]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2019222668}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnMiddleClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 406733bf-19b0-4b93-acaf-27ed23a48c53
+    m_ActionName: 'Player/OnMiddleButton[/Mouse/middleButton]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -51554,6 +51576,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 79f81bb7a00364a4f851d1828817c451, type: 2}
+    - target: {fileID: 5006086956950311310, guid: c20f38a24e061f74d851d08eae23ff7d, type: 3}
+      propertyPath: slotTowerIndex
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5172916859018274612, guid: c20f38a24e061f74d851d08eae23ff7d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 88.863594
@@ -53000,6 +53026,10 @@ PrefabInstance:
       propertyPath: currentTower
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5006086956950311310, guid: c20f38a24e061f74d851d08eae23ff7d, type: 3}
+      propertyPath: slotTowerIndex
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5172916859018274612, guid: c20f38a24e061f74d851d08eae23ff7d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 55.863594
@@ -53467,10 +53497,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.33
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!23 &2019222665
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -53523,7 +53553,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2019222662}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300024, guid: 32562d1256a1b3b4ca9be3d6ce7adf64, type: 3}
 --- !u!4 &2019222667
 Transform:
   m_ObjectHideFlags: 0
@@ -53533,7 +53563,7 @@ Transform:
   m_GameObject: {fileID: 2019222662}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 48, y: 1, z: -208}
+  m_LocalPosition: {x: 48, y: 0, z: -208}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -53552,6 +53582,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae991b845c49c5645af85ebe91ec0374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  input: {fileID: 0}
 --- !u!195 &2019222669
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -53571,7 +53602,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 1
+  m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &2019222671
@@ -53629,8 +53660,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackRange: 2
   attackCooldown: 1
+  stopDistance: 0.1
   agent: {fileID: 0}
   cam: {fileID: 0}
+  maxQueuePoints: 3
 --- !u!54 &2019222674
 Rigidbody:
   m_ObjectHideFlags: 0

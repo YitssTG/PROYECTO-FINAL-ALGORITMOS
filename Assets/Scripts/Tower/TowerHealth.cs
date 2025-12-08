@@ -20,7 +20,7 @@ public class TowerHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        Debug.Log($"🏰 {gameObject.name} recibió {damage} de daño. Vida: {currentHealth}/{maxHealth}");
+        Debug.Log($"{gameObject.name} recibió {damage} de daño. Vida: {currentHealth}/{maxHealth}");
 
         if (damage > 0)
         {
@@ -47,7 +47,7 @@ public class TowerHealth : MonoBehaviour
 
     private void DestroyTower()
     {
-        Debug.Log($"🏰 {gameObject.name} DESTRUIDA!");
+        Debug.Log($"{gameObject.name} DESTRUIDA!");
 
         if (destructionEffect != null)
         {
@@ -59,7 +59,7 @@ public class TowerHealth : MonoBehaviour
         BuildSlot slot = GetComponentInParent<BuildSlot>();
         if (slot != null)
         {
-            slot.ClearSlot();  // Limpiar el slot al destruir la torre
+            slot.ClearSlot(); 
         }
 
         if (TowerManager.Instance != null)
@@ -72,6 +72,6 @@ public class TowerHealth : MonoBehaviour
 
     void OnMouseDown()
     {
-        Debug.Log($"🏰 {gameObject.name} - Vida: {currentHealth}/{maxHealth}");
+        Debug.Log($"{gameObject.name} - Vida: {currentHealth}/{maxHealth}");
     }
 }

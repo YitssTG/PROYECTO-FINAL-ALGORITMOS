@@ -18,7 +18,7 @@ public class TowerManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        Debug.Log("✅ TowerManager inicializado correctamente");
+        Debug.Log("TowerManager inicializado correctamente");
     }
 
     private void OnDestroy()
@@ -34,7 +34,7 @@ public class TowerManager : MonoBehaviour
         if (!activeTowers.Contains(tower))
         {
             activeTowers.Add(tower);
-            Debug.Log($"🏰 Torre registrada. Total: {activeTowers.Count}");
+            Debug.Log($"Torre registrada. Total: {activeTowers.Count}");
         }
     }
 
@@ -43,7 +43,7 @@ public class TowerManager : MonoBehaviour
         if (activeTowers.Contains(tower))
         {
             activeTowers.Remove(tower);
-            Debug.Log($"🏰 Torre removida. Total: {activeTowers.Count}");
+            Debug.Log($"Torre removida. Total: {activeTowers.Count}");
         }
     }
 

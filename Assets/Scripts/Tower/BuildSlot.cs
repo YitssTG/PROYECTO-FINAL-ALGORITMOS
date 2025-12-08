@@ -11,6 +11,7 @@ public class BuildSlot : MonoBehaviour
     public Color occupiedColor = Color.red;
 
     private Renderer rend;
+    public int slotTowerIndex = 0;
 
     void Awake()
     {
@@ -22,15 +23,15 @@ public class BuildSlot : MonoBehaviour
     {
         if (isOccupied)
         {
-            Debug.Log("❌ El slot ya está ocupado");
-            return;  // El slot ya está ocupado, no se puede construir más aquí
+            Debug.Log("El slot ya está ocupado");
+            return;
         }
 
-        // Siempre intentar construir, pero chequeamos oro dentro
-        TowerSO towerSO = GameManager.Instance.GetSelectedTowerSO();
+        TowerSO towerSO = GameManager.Instance.GetTowerByIndex(slotTowerIndex);
+
         if (towerSO == null)
         {
-            Debug.LogWarning("❌ No hay torre seleccionada");
+            Debug.LogWarning("No se encontró TowerSO para este slot");
             return;
         }
 
@@ -40,7 +41,7 @@ public class BuildSlot : MonoBehaviour
         }
         else
         {
-            Debug.Log($"❌ No tienes suficiente oro para construir {towerSO.name}. Costo: {towerSO.cost}");
+            Debug.Log($"No tienes suficiente oro para {towerSO.name}. Costo: {towerSO.cost}");
         }
     }
 
@@ -49,7 +50,7 @@ public class BuildSlot : MonoBehaviour
         if (towerSO == null) return;
         if (towerSO.towerPrefab == null)
         {
-            Debug.LogError($"❌ TowerSO '{towerSO.name}' no tiene prefab asignado");
+            Debug.LogError($"TowerSO '{towerSO.name}' no tiene prefab asignado");
             return;
         }
 
@@ -69,7 +70,7 @@ public class BuildSlot : MonoBehaviour
             health.maxHealth = 100;
         }
 
-        Debug.Log($"✅ Torre construida: {currentTower.name}");
+        Debug.Log($"Torre construida: {currentTower.name}");
     }
 
     void UpdateColor()
@@ -83,7 +84,7 @@ public class BuildSlot : MonoBehaviour
         if (currentTower != null && TowerManager.Instance != null)
         {
             TowerManager.Instance.UnregisterTower(currentTower);
-            Debug.Log("🧹 Limpiando slot");
+            Debug.Log("Limpiando slot");
         }
 
         isOccupied = false;

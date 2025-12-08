@@ -10,7 +10,12 @@ public class InventoryManager : MonoBehaviour
     public Transform inventoryContainer;
     public GameObject itemNodePrefab;
 
+    [Header("Referencia directa (sin FindObjectOfType)")]
+    [SerializeField] private PlayerStats playerStats;
+
     private List<GameObject> currentItems = new List<GameObject>();
+
+    private SimpleLinkedList<ItemData> linkedInventory = new SimpleLinkedList<ItemData>();
 
     private void Awake()
     {
@@ -23,14 +28,11 @@ public class InventoryManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
     public void Initialize()
     {
-        // Limpiar inventario al inicializar
         ClearInventory();
         Debug.Log("✅ InventoryManager inicializado");
     }
-
     public void AddItem(ItemData data)
     {
         if (data == null || inventoryContainer == null || itemNodePrefab == null) return;
@@ -41,19 +43,18 @@ public class InventoryManager : MonoBehaviour
 
         currentItems.Add(newItem);
 
-        // Aplicar stats del item al jugador
+        linkedInventory.AddNode(new NodeInventory<ItemData>(data));
+        linkedInventory.DebugList();
+
         ApplyItemToPlayer(data);
     }
-
     private void ApplyItemToPlayer(ItemData item)
     {
-        PlayerStats playerStats = FindObjectOfType<PlayerStats>();
         if (playerStats != null)
         {
             playerStats.ApplyItemStats(item);
         }
     }
-
     public void RemoveItem(ItemData data)
     {
         if (data == null) return;
@@ -66,27 +67,33 @@ public class InventoryManager : MonoBehaviour
             currentItems.Remove(obj);
             Destroy(obj);
 
-            // Remover stats del item del jugador
+            linkedInventory.RemoveByValue(data);
+
             RemoveItemFromPlayer(data);
         }
     }
-
     private void RemoveItemFromPlayer(ItemData item)
     {
-        PlayerStats playerStats = FindObjectOfType<PlayerStats>();
         if (playerStats != null)
         {
             playerStats.RemoveItemStats(item);
         }
     }
-
     public void ClearInventory()
     {
         foreach (var item in currentItems)
         {
             Destroy(item);
         }
+
         currentItems.Clear();
-        Debug.Log("🎒 Inventario limpiado");
+
+        linkedInventory.Clear();
+
+        Debug.Log("Inventario limpiado");
+    }
+    public void DebugLinkedList()
+    {
+        linkedInventory.ReadAllNodes();
     }
 }

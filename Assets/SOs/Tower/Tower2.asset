@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 22f9bdf24226f644d8e4bb6dac304c9f, type: 3}
-  m_Name: Tower
+  m_Name: Tower2
   m_EditorClassIdentifier: 
   towerName: Tower
   cost: 100
   damage: 10
   range: 20
-  towerPrefab: {fileID: 7263089857831832697, guid: f1b8ed14513eb5346afc497bf28477b2, type: 3}
+  towerPrefab: {fileID: 7263089857831832697, guid: 207aa87d80b99a74682769a6a7277ee0, type: 3}

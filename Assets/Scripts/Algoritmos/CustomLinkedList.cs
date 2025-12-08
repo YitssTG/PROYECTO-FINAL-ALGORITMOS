@@ -1,76 +1,76 @@
-using System.Collections.Generic;
+//using System.Collections.Generic;
 
-public class CustomLinkedList<T>
-{
-    private ListNode<T> head;
-    private int count;
+//public class CustomLinkedList<T>
+//{
+//    private ListNode<T> head;
+//    private int count;
 
-    public int Count => count;
+//    public int Count => count;
 
-    public void Add(T value)
-    {
-        ListNode<T> newNode = new ListNode<T>(value);
+//    public void Add(T value)
+//    {
+//        ListNode<T> newNode = new ListNode<T>(value);
 
-        if (head == null)
-        {
-            head = newNode;
-        }
-        else
-        {
-            ListNode<T> temp = head;
-            while (temp.Next != null)
-            {
-                temp = temp.Next;
-            }
-            temp.SetNext(newNode);
-        }
+//        if (head == null)
+//        {
+//            head = newNode;
+//        }
+//        else
+//        {
+//            ListNode<T> temp = head;
+//            while (temp.Next != null)
+//            {
+//                temp = temp.Next;
+//            }
+//            temp.SetNext(newNode);
+//        }
 
-        count++;
-    }
+//        count++;
+//    }
 
-    public bool Remove(T value)
-    {
-        if (head == null) return false;
+//    public bool Remove(T value)
+//    {
+//        if (head == null) return false;
 
-        if (EqualityComparer<T>.Default.Equals(head.Value, value))
-        {
-            head = head.Next;
-            count--;
-            return true;
-        }
+//        if (EqualityComparer<T>.Default.Equals(head.Value, value))
+//        {
+//            head = head.Next;
+//            count--;
+//            return true;
+//        }
 
-        ListNode<T> prev = head;
-        ListNode<T> curr = head.Next;
+//        ListNode<T> prev = head;
+//        ListNode<T> curr = head.Next;
 
-        while (curr != null)
-        {
-            if (EqualityComparer<T>.Default.Equals(curr.Value, value))
-            {
-                prev.SetNext(curr.Next);
-                count--;
-                return true;
-            }
+//        while (curr != null)
+//        {
+//            if (EqualityComparer<T>.Default.Equals(curr.Value, value))
+//            {
+//                prev.SetNext(curr.Next);
+//                count--;
+//                return true;
+//            }
 
-            prev = curr;
-            curr = curr.Next;
-        }
+//            prev = curr;
+//            curr = curr.Next;
+//        }
 
-        return false;
-    }
+//        return false;
+//    }
 
-    public IEnumerable<T> GetAll()
-    {
-        ListNode<T> temp = head;
-        while (temp != null)
-        {
-            yield return temp.Value;
-            temp = temp.Next;
-        }
-    }
+//    public IEnumerable<T> GetAll()
+//    {
+//        ListNode<T> temp = head;
+//        while (temp != null)
+//        {
+//            yield return temp.Value;
+//            temp = temp.Next;
+//        }
+//    }
 
-    public void Clear()
-    {
-        head = null;
-        count = 0;
-    }
-}
+//    public void Clear()
+//    {
+//        head = null;
+//        count = 0;
+//    }
+//}

@@ -187,6 +187,11 @@ public class GameManager : MonoBehaviour
             Debug.Log($"No tienes suficiente oro para {selectedTower.name}. Costo: {selectedTower.cost}");
         }
     }
+    public TowerSO GetTowerByIndex(int index)
+    {
+        if (index < 0 || index >= towerSOList.Length) return null;
+        return towerSOList[index];
+    }
 
     public bool CanBuild()
     {

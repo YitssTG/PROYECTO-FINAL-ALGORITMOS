@@ -4,19 +4,17 @@ public class EnemyMiniTank : EnemyBase
 {
     [Header("Comportamiento Tank")]
     [HideInInspector] public float slowAuraRadius = 5f;
-    [HideInInspector] public int armor = 10;
+    //[HideInInspector] public int armor = 10;
 
     public override void Attack()
     {
-        Debug.Log($"🛡️ {enemyName} ataque TANK - Golpe con {damage} de daño");
+        Debug.Log($"{enemyName} ataque TANK - Golpe con {damage} de daño");
         ApplySlowAura();
     }
 
     public override void TakeDamage(int amount)
     {
-        int damageAfterArmor = CalculateEffectiveDamage(amount);
-        Debug.Log($"{enemyName} reduce daño {amount} -> {damageAfterArmor} (armadura: {armor})");
-        base.TakeDamage(damageAfterArmor);
+        base.TakeDamage(amount);
     }
 
     private void ApplySlowAura()
@@ -31,8 +29,8 @@ public class EnemyMiniTank : EnemyBase
         }
     }
 
-    public int CalculateEffectiveDamage(int incomingDamage)
-    {
-        return Mathf.Max(1, incomingDamage - armor);
-    }
+    //public int CalculateEffectiveDamage(int incomingDamage)
+    //{
+    //    return Mathf.Max(1, incomingDamage - armor);
+    //}
 }

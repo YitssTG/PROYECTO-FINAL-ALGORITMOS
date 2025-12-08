@@ -9,7 +9,6 @@ public abstract class EnemyBase : MonoBehaviour
     [HideInInspector] public int rewardGold;
     [HideInInspector] public EnemyMovement movement;
 
-    // 🔹 Evento de muerte para sistemas externos
     public delegate void EnemyDeathHandler(EnemyBase deadEnemy);
     public event EnemyDeathHandler OnEnemyDeath;
 
@@ -54,7 +53,6 @@ public abstract class EnemyBase : MonoBehaviour
     {
         Debug.Log($"{enemyName} ha muerto.");
 
-        // 🔹 Invocar evento de muerte
         OnEnemyDeath?.Invoke(this);
 
         Destroy(gameObject);
