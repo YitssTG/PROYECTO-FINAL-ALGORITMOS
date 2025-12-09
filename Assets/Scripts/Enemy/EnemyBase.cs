@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 
-public abstract class EnemyBase : MonoBehaviour
+public abstract class EnemyBase : MonoBehaviour, IDamageable
 {
+    [Header("UI")]
+    public EnemyHealthBarUI healthBarInstance; // Referencia directa al slider que ya está en el prefab
+
+    [Header("Stats")]
     [HideInInspector] public string enemyName;
     [HideInInspector] public int health;
     [HideInInspector] public int damage;
@@ -20,6 +24,18 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (movement == null)
             movement = GetComponent<EnemyMovement>();
+
+        if (healthBarInstance != null)
+        {
+            healthBarInstance.SetMaxHealth(health);
+            healthBarInstance.SetHealth(health);
+        }
+    }
+
+    protected virtual void Update()
+    {
+        if (healthBarInstance != null && Camera.main != null)
+            healthBarInstance.transform.LookAt(Camera.main.transform);
     }
 
     public virtual void Initialize(EnemyDataSO data, int waveNumber = 1)
@@ -38,23 +54,35 @@ public abstract class EnemyBase : MonoBehaviour
             movement.detectionRadius = data.detectionRadius;
             movement.attackRadius = data.attackRadius;
         }
+
+        if (healthBarInstance != null)
+        {
+            healthBarInstance.SetMaxHealth(health);
+            healthBarInstance.SetHealth(health);
+        }
     }
 
     public virtual void TakeDamage(int amount)
     {
         health -= amount;
-        Debug.Log($"{enemyName} recibe {amount} de daño. Vida restante: {health}");
+        if (healthBarInstance != null)
+            healthBarInstance.SetHealth(health);
 
         if (health <= 0)
             Die();
     }
 
+    public bool IsDead() => health <= 0;
+    public int GetCurrentHealth() => health;    
+
     public virtual void Die()
     {
-        Debug.Log($"{enemyName} ha muerto.");
+        if (healthBarInstance != null)
+            Destroy(healthBarInstance.gameObject);
 
         OnEnemyDeath?.Invoke(this);
 
+        Debug.Log($"{enemyName} ha muerto.");
         Destroy(gameObject);
     }
 

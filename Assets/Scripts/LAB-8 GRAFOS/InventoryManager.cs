@@ -31,7 +31,7 @@ public class InventoryManager : MonoBehaviour
     public void Initialize()
     {
         ClearInventory();
-        Debug.Log("✅ InventoryManager inicializado");
+        Debug.Log("InventoryManager inicializado");
     }
     public void AddItem(ItemData data)
     {

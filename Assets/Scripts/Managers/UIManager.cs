@@ -11,9 +11,9 @@ public class UIManager : MonoBehaviour
     public HealthBarUI healthBarUI;
 
     [Header("Referencias de Sistemas")]
-    public GoldManager goldManager; // ⭐ ASIGNAR EN INSPECTOR
-    public PlayerStats playerStats; // ⭐ ASIGNAR EN INSPECTOR  
-    public PlayerHealth playerHealth; // ⭐ NUEVO: ASIGNAR EN INSPECTOR
+    public GoldManager goldManager; 
+    public PlayerStats playerStats;
+    public PlayerHealth playerHealth; 
 
     void Start()
     {
@@ -25,7 +25,6 @@ public class UIManager : MonoBehaviour
     #region Inicialización
     private void InitializeReferences()
     {
-        // Usar GameManager como fallback solo si las referencias no están asignadas
         if (goldManager == null && GameManager.Instance != null)
         {
             goldManager = GameManager.Instance.GetGoldManager();
@@ -46,45 +45,41 @@ public class UIManager : MonoBehaviour
 
         // Verificar componentes críticos
         if (goldManager == null)
-            Debug.LogError("❌ GoldManager no encontrado. Asigna la referencia en Inspector.");
+            Debug.LogError("GoldManager no encontrado. Asigna la referencia en Inspector.");
         else
-            Debug.Log("✅ GoldManager encontrado");
+            Debug.Log("GoldManager encontrado");
 
         if (playerStats == null)
-            Debug.LogError("❌ PlayerStats no encontrado. Asigna la referencia en Inspector.");
+            Debug.LogError("PlayerStats no encontrado. Asigna la referencia en Inspector.");
         else
-            Debug.Log("✅ PlayerStats encontrado");
+            Debug.Log("PlayerStats encontrado");
 
         if (playerHealth == null)
-            Debug.LogError("❌ PlayerHealth no encontrado. Asigna la referencia en Inspector.");
+            Debug.LogError("PlayerHealth no encontrado. Asigna la referencia en Inspector.");
         else
-            Debug.Log("✅ PlayerHealth encontrado");
+            Debug.Log("PlayerHealth encontrado");
 
         if (healthBarUI == null)
-            Debug.LogError("❌ HealthBarUI no asignado en UIManager");
+            Debug.LogError("HealthBarUI no asignado en UIManager");
         else
-            Debug.Log("✅ HealthBarUI encontrado");
+            Debug.Log("HealthBarUI encontrado");
     }
 
     private void SetupEventListeners()
     {
-        // Gold Manager events
         if (goldManager != null)
         {
-            // Usar el evento directamente si existe
             if (goldManager.OnGoldChanged != null)
             {
                 goldManager.OnGoldChanged.AddListener(UpdateGoldDisplay);
             }
         }
 
-        // Player Health events
         if (playerHealth != null)
         {
             playerHealth.OnHealthChanged.AddListener(OnHealthChanged);
         }
 
-        // Player Stats events
         if (playerStats != null)
         {
             if (playerStats.OnExperienceChanged != null)
@@ -94,7 +89,6 @@ public class UIManager : MonoBehaviour
                 playerStats.OnLevelChanged.AddListener(UpdateLevelDisplay);
         }
 
-        // Eventos de autocuración
         EventManager.OnHealthRegenStarted += OnHealthRegenStarted;
         EventManager.OnHealthRegenStopped += OnHealthRegenStopped;
         EventManager.OnHealthRegenTick += OnHealthRegenTick;
@@ -104,7 +98,6 @@ public class UIManager : MonoBehaviour
     #region Actualización de UI
     private void Update()
     {
-        // Actualización manual como fallback
         UpdateGoldDisplayManual();
         UpdateEnemiesDefeatedDisplay();
     }
@@ -120,67 +113,67 @@ public class UIManager : MonoBehaviour
     private void OnHealthChanged(int currentHealth)
     {
         // HealthBarUI maneja su propia actualización
-        Debug.Log($"❤️ Vida actualizada: {currentHealth}");
+        Debug.Log($"Vida actualizada: {currentHealth}");
     }
 
     private void OnHealthRegenStarted()
     {
-        Debug.Log("🔄 Autocuración iniciada - Efectos visuales pueden ir aquí");
+        Debug.Log("Autocuración iniciada - Efectos visuales pueden ir aquí");
     }
 
     private void OnHealthRegenStopped()
     {
-        Debug.Log("⏹️ Autocuración detenida");
+        Debug.Log("Autocuración detenida");
     }
 
     private void OnHealthRegenTick(int healAmount)
     {
-        Debug.Log($"💚 Curación tick: +{healAmount} HP");
+        Debug.Log($"Curación tick: +{healAmount} HP");
     }
 
     // Métodos con eventos
     private void UpdateGoldDisplay(int newGoldAmount)
     {
         if (goldText != null)
-            goldText.text = $"💰 {newGoldAmount}G";
+            goldText.text = $"{newGoldAmount}G";
     }
 
     private void UpdateExperienceDisplay(int newExperienceAmount)
     {
         if (experienceText != null)
-            experienceText.text = $"📚 {newExperienceAmount}";
+            experienceText.text = $"{newExperienceAmount}";
     }
 
     private void UpdateLevelDisplay(int newLevel)
     {
         if (levelText != null)
-            levelText.text = $"⭐ Nv {newLevel}";
+            levelText.text = $"{newLevel}";
     }
 
     // Métodos manuales (fallback)
     private void UpdateGoldDisplayManual()
     {
         if (goldText != null && goldManager != null)
-            goldText.text = $"💰 {goldManager.currentGold}G";
+            goldText.text = $"{goldManager.currentGold}G";
     }
 
     private void UpdateExperienceDisplayManual()
     {
         if (experienceText != null && playerStats != null)
-            experienceText.text = $"📚 {playerStats.experience}";
+            experienceText.text = $"{playerStats.experience}";
     }
 
     private void UpdateLevelDisplayManual()
     {
         if (levelText != null && playerStats != null)
-            levelText.text = $"⭐ Nv {playerStats.playerLevel}";
+            levelText.text = $"{playerStats.playerLevel}";
     }
 
     private void UpdateEnemiesDefeatedDisplay()
     {
         if (enemiesDefeatedText != null && GameManager.Instance != null)
         {
-            enemiesDefeatedText.text = $"🎯 {GameManager.Instance.enemigosDerrotados}";
+            enemiesDefeatedText.text = $"{GameManager.Instance.enemigosDerrotados}";
         }
     }
 

@@ -1,50 +1,23 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class TowerTargetingQuickSort : MonoBehaviour
+public class TowerTargetingQuickSort : TowerBase
 {
-    [Header("Config")]
-    public TowerSO towerData;
     public GameObject bulletPrefab;
     public Transform firePoint;
 
-    private float attackRange;
-    private int damage;
-    private float fireRate = 1f;
-    private float fireCountdown;
-
-    private void Start()
+    protected override EnemyBase GetTarget()
     {
-        if (towerData == null) return;
+        if (data == null) return null; // <--- PREVENCIÓN
 
-        attackRange = towerData.range;
-        damage = (int)towerData.damage;
-    }
-
-    void Update()
-    {
-        fireCountdown -= Time.deltaTime;
-
-        EnemyBase target = GetLowestHealthEnemy();
-
-        if (target != null && fireCountdown <= 0f)
-        {
-            Shoot(target);
-            fireCountdown = fireRate;
-        }
-    }
-
-    private EnemyBase GetLowestHealthEnemy()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, attackRange);
-
+        Collider[] hits = Physics.OverlapSphere(transform.position, AttackRange);
         List<EnemyBase> enemies = new List<EnemyBase>();
         List<int> healthValues = new List<int>();
 
-        for (int i = 0; i < hits.Length; i++)
+        foreach (var hit in hits)
         {
-            EnemyBase enemy = hits[i].GetComponent<EnemyBase>();
-            if (enemy != null && enemy.CurrentHealth > 0)
+            EnemyBase enemy = hit.GetComponent<EnemyBase>();
+            if (enemy != null)
             {
                 enemies.Add(enemy);
                 healthValues.Add(enemy.CurrentHealth);
@@ -55,25 +28,19 @@ public class TowerTargetingQuickSort : MonoBehaviour
 
         QuickSortUtil.QuickSort(healthValues, 0, healthValues.Count - 1);
 
-        int lowestHealth = healthValues[0];
-
-        for (int i = 0; i < enemies.Count; i++)
-        {
-            if (enemies[i].CurrentHealth == lowestHealth)
-                return enemies[i];
-        }
+        int lowest = healthValues[0];
+        foreach (var enemy in enemies)
+            if (enemy.CurrentHealth == lowest)
+                return enemy;
 
         return null;
     }
 
-    private void Shoot(EnemyBase enemy)
+    public override void Shoot(EnemyBase enemy)
     {
-        if (bulletPrefab == null || firePoint == null) return;
-
-        GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        Bullet bullet = bulletObj.GetComponent<Bullet>();
-        bullet.SetTarget(enemy, damage);
-
-        Debug.Log($"Disparo a {enemy.EnemyName} con {enemy.CurrentHealth} HP");
+        GameObject bulletObj =
+            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Bullet b = bulletObj.GetComponent<Bullet>();
+        b.SetTarget(enemy, Damage);
     }
 }

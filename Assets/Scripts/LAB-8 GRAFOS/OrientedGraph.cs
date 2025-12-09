@@ -26,7 +26,7 @@ public class OrientedGraph<T>
 
     public void PrintAdjacencyList()
     {
-        Debug.Log("📋 LISTA DE ADYACENCIA:");
+        Debug.Log("LISTA DE ADYACENCIA:");
         foreach (var node in nodes)
         {
             string neighbors = "";
@@ -38,7 +38,7 @@ public class OrientedGraph<T>
 
     public void PrintAdjacencyMatrix()
     {
-        Debug.Log("🧮 MATRIZ DE ADYACENCIA:");
+        Debug.Log("MATRIZ DE ADYACENCIA:");
         for (int i = 0; i < nodes.Count; i++)
         {
             string row = "";

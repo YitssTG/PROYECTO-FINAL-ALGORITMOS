@@ -59,7 +59,7 @@ public class TowerHealth : MonoBehaviour
         BuildSlot slot = GetComponentInParent<BuildSlot>();
         if (slot != null)
         {
-            slot.ClearSlot(); 
+            slot.ClearSlot();
         }
 
         if (TowerManager.Instance != null)

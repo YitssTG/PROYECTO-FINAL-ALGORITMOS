@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CameraMovement : MonoBehaviour
 {
-    [Header("📌 Camera Settings")]
+    [Header("Camera Settings")]
     [Tooltip("Velocidad de movimiento de la cámara en modo libre")]
     [Range(1.0f, 50.0f)]
     public float movementSpeed = 10f;
@@ -11,11 +12,11 @@ public class CameraMovement : MonoBehaviour
     [Range(10.0f, 80.0f)]
     public float angle = 45f;
 
-    [Header("📌 Rotación Manual (solo inspector)")]
+    [Header("Rotación Manual (solo inspector)")]
     [Tooltip("Gira la cámara alrededor del jugador sin usar teclado/mouse")]
     public float rotationOffset = 0f;
 
-    [Header("📌 Zoom Settings")]
+    [Header("Zoom Settings")]
     [Tooltip("Distancia inicial de la cámara al jugador")]
     public float distance = 12f;
 
@@ -29,13 +30,13 @@ public class CameraMovement : MonoBehaviour
     [Range(1.0f, 20.0f)]
     public float zoomSpeed = 5f;
 
-    [Header("📌 Edge Scrolling")]
+    [Header("Edge Scrolling")]
     [Tooltip("Porcentaje de pantalla que activa el desplazamiento en modo libre")]
     [Range(0.01f, 0.3f)]
     public float hScreenPercentage = 0.1f;
     public float vScreenPercentage = 0.1f;
 
-    [Header("📌 Player Reference")]
+    [Header("Player Reference")]
     [Tooltip("Referencia al jugador (arrastrar en el Inspector)")]
     public Transform player;
 
@@ -64,7 +65,7 @@ public class CameraMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             freeMode = !freeMode;
             if (!freeMode)
@@ -72,14 +73,12 @@ public class CameraMovement : MonoBehaviour
         }
     }
 
-    // 🔹 Movimiento por bordes, estilo LoL (solo en plano XZ)
     private void MoveCamera()
     {
         Vector3 mp = Input.mousePosition;
         int w = Screen.width;
         int h = Screen.height;
 
-        // direcciones planas (sin subir/bajar la cámara)
         Vector3 forward = transform.forward;
         forward.y = 0;
         forward.Normalize();
@@ -90,19 +89,15 @@ public class CameraMovement : MonoBehaviour
 
         Vector3 move = Vector3.zero;
 
-        // izquierda
         if (mp.x < w * hScreenPercentage)
             move -= right;
 
-        // derecha
         if (mp.x > w - w * hScreenPercentage)
             move += right;
 
-        // abajo
         if (mp.y < h * vScreenPercentage)
             move -= forward;
 
-        // arriba
         if (mp.y > h - h * vScreenPercentage)
             move += forward;
 
@@ -110,20 +105,17 @@ public class CameraMovement : MonoBehaviour
             transform.position += move.normalized * movementSpeed * Time.deltaTime;
     }
 
-    // 🔹 Zoom con la rueda, usando tus parámetros distance/min/max
     private void HandleZoom()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel"); // viejo Input System
+        float scroll = Input.GetAxis("Mouse ScrollWheel"); 
 
         if (Mathf.Abs(scroll) > 0.01f)
         {
-            // igual que tu versión original
             distance -= scroll * zoomSpeed;
             distance = Mathf.Clamp(distance, minDistance, maxDistance);
         }
     }
 
-    // 🔹 Seguir al player usando angle + distance + rotationOffset
     public void CenterAtPlayer()
     {
         if (player == null) return;
@@ -135,7 +127,6 @@ public class CameraMovement : MonoBehaviour
 
         Vector3 baseOffset = new Vector3(0, y, -z);
 
-        // aplicamos la rotación manual de la cámara
         Quaternion rot = Quaternion.Euler(0f, rotationOffset, 0f);
         Vector3 rotatedOffset = rot * baseOffset;
 

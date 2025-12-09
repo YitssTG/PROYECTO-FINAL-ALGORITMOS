@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Tower
   m_EditorClassIdentifier: 
   towerName: Tower
-  cost: 100
-  damage: 10
-  range: 20
+  cost: 400
+  damage: 5
+  range: 18
   towerPrefab: {fileID: 7263089857831832697, guid: f1b8ed14513eb5346afc497bf28477b2, type: 3}

@@ -22,13 +22,12 @@ public class ItemManager : MonoBehaviour
     {
         HashSet<ItemData> unique = new HashSet<ItemData>();
 
-        // Iterar sobre todos los grafos y asegurarse de que los ítems del primer ítem de cada categoría se desbloqueen.
         for (int g = 0; g < allGraphs.Count; g++)
         {
             var graph = allGraphs[g];
             if (graph == null) continue;
 
-            graph.InitializeGraphItems();  // Aseguramos que el primer ítem del gráfico se desbloquee.
+            graph.InitializeGraphItems(); 
 
             var items = graph.GetCleanItems();
             for (int i = 0; i < items.Count; i++)
@@ -41,7 +40,6 @@ public class ItemManager : MonoBehaviour
         allItems = new List<ItemData>(unique);
     }
 
-    // ---------- ESTADO INICIAL ----------
     public void Initialize()
     {
         ResetAllItems();
@@ -110,30 +108,26 @@ public class ItemManager : MonoBehaviour
             }
         }
 
-        // Aseguramos que el primer ítem de cada categoría se desbloquee
         UnlockFirstItemOfEachCategory();
     }
 
-    // Inicializa los estados de los ítems (desbloqueo y compra)
     public void InitializeItemStates()
     {
-        foreach (var graph in allGraphs)  // Recorremos todos los gráficos de ítems
+        foreach (var graph in allGraphs) 
         {
             if (graph == null) continue;
 
-            // Desbloquear el primer ítem de cada categoría (independientemente de otras categorías)
             if (graph.items.Count > 0 && graph.items[0] != null)
             {
-                graph.items[0].isUnlocked = true;  // Desbloquear el primer ítem de esta categoría
+                graph.items[0].isUnlocked = true; 
             }
 
-            // Reiniciar todos los ítems de la categoría para que estén bloqueados y no comprados
             foreach (var item in graph.items)
             {
                 if (item != null)
                 {
-                    item.isPurchased = false;  // Reiniciar compra
-                    if (item != graph.items[0])  // Solo desbloquear el primero
+                    item.isPurchased = false;  
+                    if (item != graph.items[0])  
                     {
                         item.isUnlocked = false;
                     }
@@ -142,17 +136,15 @@ public class ItemManager : MonoBehaviour
         }
     }
 
-    // Método para desbloquear el primer ítem de cada categoría de manera independiente
     private void UnlockFirstItemOfEachCategory()
     {
-        foreach (var graph in allGraphs)  // Iterar sobre todos los grafos de ítems
+        foreach (var graph in allGraphs)  
         {
             if (graph == null) continue;
 
-            // Desbloquear el primer ítem de cada categoría (ataque, defensa, velocidad) si está disponible
             if (graph.items.Count > 0 && graph.items[0] != null)
             {
-                graph.items[0].isUnlocked = true;  // Desbloquear el primer ítem de esta categoría
+                graph.items[0].isUnlocked = true; 
             }
         }
     }

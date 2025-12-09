@@ -14,12 +14,10 @@ public class PlayerStats : MonoBehaviour
     public float baseSpeed = 5f;
     public float baseArmor = 0f;
 
-    // Estadísticas actuales (base + items)
     public float CurrentDamage { get; private set; }
     public float CurrentSpeed { get; private set; }
     public float CurrentArmor { get; private set; }
 
-    // Referencia cacheada a PlayerHealth
     private PlayerHealth _playerHealth;
     private PlayerHealth PlayerHealth
     {
@@ -31,7 +29,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // Eventos
     public UnityEvent<int> OnExperienceChanged = new();
     public UnityEvent<int> OnLevelChanged = new();
     public UnityEvent OnStatsChanged = new();
@@ -49,7 +46,7 @@ public class PlayerStats : MonoBehaviour
         CurrentArmor = baseArmor;
 
         UpdateMovementSpeed();
-        Debug.Log($"🎯 PlayerStats inicializado - Nivel {playerLevel}");
+        Debug.Log($"PlayerStats inicializado - Nivel {playerLevel}");
     }
 
     private void UpdateMovementSpeed()
@@ -63,19 +60,17 @@ public class PlayerStats : MonoBehaviour
     #endregion
 
     #region ⭐ MÉTODOS DE REDIRECCIÓN PARA SISTEMAS EXISTENTES
-    // Estos métodos existen para que el código legacy funcione
-    // pero muestran advertencias para que eventualmente los cambies
 
     public bool isInvulnerable
     {
         get
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.isInvulnerable en lugar de playerStats.isInvulnerable");
+            Debug.LogWarning("Usa playerHealth.isInvulnerable en lugar de playerStats.isInvulnerable");
             return PlayerHealth != null && PlayerHealth.isInvulnerable;
         }
         set
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.isInvulnerable en lugar de playerStats.isInvulnerable");
+            Debug.LogWarning("Usa playerHealth.isInvulnerable en lugar de playerStats.isInvulnerable");
             if (PlayerHealth != null)
                 PlayerHealth.isInvulnerable = value;
         }
@@ -83,20 +78,20 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        Debug.LogWarning("⚠️ Usa playerHealth.TakeDamage() en lugar de playerStats.TakeDamage()");
+        Debug.LogWarning("Usa playerHealth.TakeDamage() en lugar de playerStats.TakeDamage()");
         if (PlayerHealth != null)
         {
             PlayerHealth.TakeDamage(amount);
         }
         else
         {
-            Debug.LogError("❌ PlayerHealth no encontrado");
+            Debug.LogError("PlayerHealth no encontrado");
         }
     }
 
     public void Heal(int amount)
     {
-        Debug.LogWarning("⚠️ Usa playerHealth.Heal() en lugar de playerStats.Heal()");
+        Debug.LogWarning("Usa playerHealth.Heal() en lugar de playerStats.Heal()");
         if (PlayerHealth != null)
         {
             PlayerHealth.Heal(amount);
@@ -107,12 +102,12 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.currentHealth en lugar de playerStats.currentHealth");
+            Debug.LogWarning("Usa playerHealth.currentHealth en lugar de playerStats.currentHealth");
             return PlayerHealth != null ? PlayerHealth.currentHealth : 0;
         }
         set
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.currentHealth en lugar de playerStats.currentHealth");
+            Debug.LogWarning("Usa playerHealth.currentHealth en lugar de playerStats.currentHealth");
             if (PlayerHealth != null)
                 PlayerHealth.currentHealth = value;
         }
@@ -122,12 +117,12 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.maxHealth en lugar de playerStats.maxHealth");
+            Debug.LogWarning("Usa playerHealth.maxHealth en lugar de playerStats.maxHealth");
             return PlayerHealth != null ? PlayerHealth.maxHealth : 100;
         }
         set
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.maxHealth en lugar de playerStats.maxHealth");
+            Debug.LogWarning("Usa playerHealth.maxHealth en lugar de playerStats.maxHealth");
             if (PlayerHealth != null)
                 PlayerHealth.maxHealth = value;
         }
@@ -137,12 +132,12 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.isDead en lugar de playerStats.isDead");
+            Debug.LogWarning("Usa playerHealth.isDead en lugar de playerStats.isDead");
             return PlayerHealth != null && PlayerHealth.isDead;
         }
         set
         {
-            Debug.LogWarning("⚠️ Usa playerHealth.isDead en lugar de playerStats.isDead");
+            Debug.LogWarning("Usa playerHealth.isDead en lugar de playerStats.isDead");
             if (PlayerHealth != null)
                 PlayerHealth.isDead = value;
         }
@@ -179,7 +174,7 @@ public class PlayerStats : MonoBehaviour
         OnLevelChanged?.Invoke(playerLevel);
         EventManager.PlayerLevelUp(playerLevel);
 
-        Debug.Log($"🎉 ¡Nivel {playerLevel} alcanzado! Puntos restantes: {skillPoints}");
+        Debug.Log($"¡Nivel {playerLevel} alcanzado! Puntos restantes: {skillPoints}");
     }
     #endregion
 
@@ -188,14 +183,14 @@ public class PlayerStats : MonoBehaviour
     {
         if (skillPoints <= 0 || (PlayerHealth != null && PlayerHealth.isDead))
         {
-            Debug.Log("⚠️ No hay puntos de habilidad disponibles");
+            Debug.Log("No hay puntos de habilidad disponibles");
             return false;
         }
 
         AbilitySystem abilitySystem = GetComponent<AbilitySystem>();
         if (abilitySystem == null)
         {
-            Debug.LogError("❌ AbilitySystem no encontrado en el player");
+            Debug.LogError("AbilitySystem no encontrado en el player");
             return false;
         }
 
@@ -203,11 +198,11 @@ public class PlayerStats : MonoBehaviour
         if (upgraded)
         {
             skillPoints--;
-            Debug.Log($"🔧 Habilidad {abilityKey} mejorada. Puntos restantes: {skillPoints}");
+            Debug.Log($"Habilidad {abilityKey} mejorada. Puntos restantes: {skillPoints}");
             return true;
         }
 
-        Debug.Log($"⚠️ No se pudo mejorar la habilidad {abilityKey}");
+        Debug.Log($"No se pudo mejorar la habilidad {abilityKey}");
         return false;
     }
     #endregion
@@ -218,7 +213,7 @@ public class PlayerStats : MonoBehaviour
         CurrentDamage += amount;
         OnStatsChanged?.Invoke();
         EventManager.PlayerStatsChanged();
-        Debug.Log($"⚔️ Daño aumentado: +{amount}. Total: {CurrentDamage}");
+        Debug.Log($"Daño aumentado: +{amount}. Total: {CurrentDamage}");
     }
 
     public void IncreaseArmor(float amount)
@@ -226,7 +221,7 @@ public class PlayerStats : MonoBehaviour
         CurrentArmor += amount;
         OnStatsChanged?.Invoke();
         EventManager.PlayerStatsChanged();
-        Debug.Log($"🛡️ Armadura aumentada: +{amount}. Total: {CurrentArmor}");
+        Debug.Log($"Armadura aumentada: +{amount}. Total: {CurrentArmor}");
     }
 
     public void IncreaseSpeed(float amount)
@@ -235,7 +230,7 @@ public class PlayerStats : MonoBehaviour
         UpdateMovementSpeed();
         OnStatsChanged?.Invoke();
         EventManager.PlayerStatsChanged();
-        Debug.Log($"🏃 Velocidad aumentada: +{amount}. Total: {CurrentSpeed}");
+        Debug.Log($"Velocidad aumentada: +{amount}. Total: {CurrentSpeed}");
     }
     #endregion
 
@@ -277,6 +272,7 @@ public class PlayerStats : MonoBehaviour
         if (PlayerHealth != null && PlayerHealth.isDead) return;
         GoldManager.Instance?.AddGold(amount);
     }
+    
 
     public bool SpendGold(int cost)
     {

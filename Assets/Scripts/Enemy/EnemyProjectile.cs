@@ -55,13 +55,13 @@ public class EnemyProjectile : MonoBehaviour
         }
 
          //⭐ NUEVO: Dañar torretas
-        TowerHealth tower = other.GetComponent<TowerHealth>();
-        if (tower != null)
-        {
-            tower.TakeDamage(damage);
-            Destroy(gameObject);
-            return;
-        }
+        //TowerHealth tower = other.GetComponent<TowerHealth>();
+        //if (tower != null)
+        //{
+        //    tower.TakeDamage(damage);
+        //    Destroy(gameObject);
+        //    return;
+        //}
 
         if (!other.isTrigger)
         {

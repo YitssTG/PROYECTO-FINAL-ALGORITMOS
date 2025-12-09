@@ -9,8 +9,8 @@ public class BuildSlot : MonoBehaviour
     [Header("Visuals")]
     public Color freeColor = Color.green;
     public Color occupiedColor = Color.red;
-
     private Renderer rend;
+
     public int slotTowerIndex = 0;
 
     void Awake()
@@ -48,6 +48,7 @@ public class BuildSlot : MonoBehaviour
     public void PlaceTower(TowerSO towerSO)
     {
         if (towerSO == null) return;
+
         if (towerSO.towerPrefab == null)
         {
             Debug.LogError($"TowerSO '{towerSO.name}' no tiene prefab asignado");
@@ -62,13 +63,6 @@ public class BuildSlot : MonoBehaviour
 
         if (TowerManager.Instance != null)
             TowerManager.Instance.RegisterTower(currentTower);
-
-        TowerHealth health = currentTower.GetComponent<TowerHealth>();
-        if (health == null)
-        {
-            health = currentTower.AddComponent<TowerHealth>();
-            health.maxHealth = 100;
-        }
 
         Debug.Log($"Torre construida: {currentTower.name}");
     }

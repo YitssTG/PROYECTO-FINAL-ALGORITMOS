@@ -28,7 +28,7 @@ public class EnemyAttack : MonoBehaviour
 
         if (dist <= mov.attackRadius)
         {
-            TryAttack(mov.target); // Atacamos directamente al jugador
+            TryAttack(mov.target); 
         }
     }
 

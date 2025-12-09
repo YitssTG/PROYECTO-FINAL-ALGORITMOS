@@ -1,98 +1,58 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-public class TowerTargetingInsertionSort : MonoBehaviour
+public class TowerTargetingInsertionSort : TowerBase
 {
-    [Header("Config")]
-    public TowerSO towerData;
     public GameObject bulletPrefab;
     public Transform firePoint;
+    private Transform player;
 
-    private float attackRange;
-    private int damage;
-    private float fireRate = 1f;
-    private float fireCountdown;
-
-    private Transform player; // referencia al player
-
-    private void Start()
+    private void Awake()
     {
-        if (towerData == null)
-        {
-            Debug.LogError("Falta TowerSO en " + gameObject.name);
-            return;
-        }
-
-        attackRange = towerData.range;
-        damage = (int)towerData.damage;
-
         player = GameObject.FindWithTag("Player")?.transform;
     }
 
-    void Update()
+    protected override EnemyBase GetTarget()
     {
-        fireCountdown -= Time.deltaTime;
-
-        EnemyBase target = GetClosestEnemyUsingInsertion();
-
-        if (target != null && fireCountdown <= 0f)
-        {
-            Shoot(target);
-            fireCountdown = fireRate;
-        }
-    }
-
-    private EnemyBase GetClosestEnemyUsingInsertion()
-    {
+        if (data == null) return null; 
         if (player == null) return null;
 
-        Collider[] hits = Physics.OverlapSphere(transform.position, attackRange);
-
+        Collider[] hits = Physics.OverlapSphere(transform.position, AttackRange);
         List<EnemyBase> enemies = new List<EnemyBase>();
         List<int> distances = new List<int>();
 
         foreach (var hit in hits)
         {
-            EnemyBase enemy = hit.GetComponent<EnemyBase>();
-            if (enemy != null)
+            EnemyBase e = hit.GetComponent<EnemyBase>();
+            if (e != null)
             {
-                enemies.Add(enemy);
-
-                int d = Mathf.RoundToInt(
-                    Vector3.Distance(player.position, enemy.transform.position) * 100f
-                );
-
-                distances.Add(d);
+                enemies.Add(e);
+                int dist = Mathf.RoundToInt(Vector3.Distance(player.position, e.transform.position) * 100f);
+                distances.Add(dist);
             }
         }
 
         if (distances.Count == 0) return null;
 
-        // 🔥 usando TU algoritmo de profesor
         InsertionSortUtil.InsertionSort(distances);
 
-        int closestDistance = distances[0];
-
-        // encontrar el enemigo con esa distancia
+        int closest = distances[0];
         foreach (var e in enemies)
         {
-            int d = Mathf.RoundToInt(
-                Vector3.Distance(player.position, e.transform.position) * 100f
-            );
-
-            if (d == closestDistance)
+            int d = Mathf.RoundToInt(Vector3.Distance(player.position, e.transform.position) * 100f);
+            if (d == closest)
                 return e;
         }
 
         return null;
     }
 
-    private void Shoot(EnemyBase enemy)
+    public override void Shoot(EnemyBase enemy)
     {
-        if (bulletPrefab == null || firePoint == null) return;
+        GameObject bulletObj =
+            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
 
-        GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Bullet bullet = bulletObj.GetComponent<Bullet>();
-        bullet.SetTarget(enemy, damage);
+        bullet.SetTarget(enemy, Damage);
     }
 }

@@ -112,10 +112,8 @@ public class ShopManager : MonoBehaviour
 
         ApplyStats(item);
 
-        // Notificar via evento
         OnItemPurchased?.Invoke(item);
 
-        // Refrescar UI si está asignada
         if (shopUI != null)
             shopUI.RefreshUI();
 

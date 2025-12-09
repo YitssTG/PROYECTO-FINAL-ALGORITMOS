@@ -18,7 +18,7 @@ MonoBehaviour:
   description: 
   bonusDamage: 0
   bonusArmor: 0
-  bonusSpeed: 7
+  bonusSpeed: 0.3
   requiredItems:
   - {fileID: 11400000, guid: 180805624cca14f4e8e4cd35ba679afa, type: 2}
   isUnlocked: 0

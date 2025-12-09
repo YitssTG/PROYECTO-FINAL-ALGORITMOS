@@ -43,7 +43,6 @@ GameObject:
   - component: {fileID: 6040994375075532455}
   - component: {fileID: 6304586638128851147}
   - component: {fileID: 1230168710536834271}
-  - component: {fileID: -4089243570092908234}
   - component: {fileID: -6640130322763294479}
   m_Layer: 0
   m_Name: Tower2
@@ -142,21 +141,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-4089243570092908234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7263089857831832697}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66bacf9fa0909a24487dfb91a45f895e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 500
-  currentHealth: 500
-  destructionEffect: {fileID: 0}
 --- !u!114 &-6640130322763294479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,6 +153,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff7a290823adeff46a06ffbc14133e67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  towerData: {fileID: 11400000, guid: 38187ce1d7a0b904d9a1baa410592905, type: 2}
+  data: {fileID: 11400000, guid: 38187ce1d7a0b904d9a1baa410592905, type: 2}
   bulletPrefab: {fileID: 442921979562225372, guid: b3f7431c6c1b024449233a81ebee9de5, type: 3}
   firePoint: {fileID: 5050787779007680086}

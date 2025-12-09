@@ -7,7 +7,6 @@ public class UIConnectionDrawer : MonoBehaviour
 
     public void DrawConnections()
     {
-        // Limpiar conexiones anteriores
         foreach (Transform child in transform)
             Destroy(child.gameObject);
 
@@ -16,7 +15,6 @@ public class UIConnectionDrawer : MonoBehaviour
         ItemGraphUI graphUI = GetComponentInParent<ItemGraphUI>();
         if (graphUI == null) return;
 
-        // Dibujar conexiones entre nodos
         foreach (var item in graphUI.nodeLookup.Keys)
         {
             if (item.requiredItems == null) continue;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Header("Configuración de Salud")]
     public int maxHealth = 100;
@@ -10,15 +10,14 @@ public class PlayerHealth : MonoBehaviour
     public bool isDead = false;
 
     [Header("Opciones de Muerte")]
-    public bool destroyOnDeath = true; // ⭐ NUEVO: Controlar si se destruye
-    public float deathDelay = 0.1f;    // ⭐ REDUCIDO: Muy poco tiempo
+    public bool destroyOnDeath = true;
+    public float deathDelay = 0.1f;
 
     [Header("Eventos de Salud")]
     public UnityEvent<int> OnHealthChanged = new();
     public UnityEvent OnPlayerDiedEvent = new();
     public UnityEvent OnPlayerRespawned = new();
 
-    // Componentes relacionados
     private HealthRegenSystem healthRegen;
     private PlayerStats playerStats;
 
@@ -38,20 +37,18 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         isDead = false;
-
         OnHealthChanged?.Invoke(currentHealth);
         EventManager.LifeChanged(currentHealth);
 
-        Debug.Log($"❤️ PlayerHealth inicializado - Vida: {currentHealth}/{maxHealth}");
+        Debug.Log($"PlayerHealth inicializado - Vida: {currentHealth}/{maxHealth}");
     }
     #endregion
 
-    #region Sistema de Daño y Curación
+    #region Daño y Curación
     public void TakeDamage(int amount)
     {
         if (isInvulnerable || amount <= 0 || isDead) return;
 
-        // Calcular daño final con armadura
         int finalDamage = CalculateFinalDamage(amount);
 
         currentHealth -= finalDamage;
@@ -60,40 +57,45 @@ public class PlayerHealth : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth);
         EventManager.LifeChanged(currentHealth);
 
-        Debug.Log($"💔 {finalDamage} daño recibido. Vida: {currentHealth}/{maxHealth}");
+        Debug.Log($"{finalDamage} daño recibido. Vida: {currentHealth}/{maxHealth}");
 
-        // Notificar sistema de regeneración
         healthRegen?.OnDamageTaken();
 
-        // ⭐ CUANDO VIDA LLEGA A 0 - PLAYER MUERE AL INSTANTE
         if (currentHealth <= 0 && !isDead)
-        {
             Die();
-        }
     }
 
     private int CalculateFinalDamage(int incomingDamage)
     {
         float armor = playerStats?.CurrentArmor ?? 0f;
-        int damageAfterArmor = Mathf.Max(1, incomingDamage - Mathf.RoundToInt(armor));
-        return damageAfterArmor;
+        return Mathf.Max(1, incomingDamage - Mathf.RoundToInt(armor));
     }
 
     public void Heal(int amount)
     {
         if (amount <= 0 || isDead) return;
 
-        currentHealth += amount;
-        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
 
         OnHealthChanged?.Invoke(currentHealth);
         EventManager.LifeChanged(currentHealth);
 
-        Debug.Log($"❤️ Curado {amount}. Vida: {currentHealth}/{maxHealth}");
+        Debug.Log($"Curado {amount}. Vida: {currentHealth}/{maxHealth}");
     }
     #endregion
 
-    #region ⭐ SISTEMA DE MUERTE MEJORADO (MUERTE INMEDIATA)
+    #region IDamageable
+    public bool IsDead() => isDead;
+
+    public int GetCurrentHealth() => currentHealth;
+
+    public bool IsAlive()
+    {
+        return !isDead && currentHealth > 0;
+    }
+    #endregion
+
+    #region Sistema de Muerte
     private void Die()
     {
         if (isDead) return;
@@ -101,82 +103,59 @@ public class PlayerHealth : MonoBehaviour
         isDead = true;
         currentHealth = 0;
 
-        Debug.Log("💀 PLAYER MURIÓ INMEDIATAMENTE - Vida llegó a 0");
+        Debug.Log("PLAYER MURIÓ - Vida en 0");
 
-        // 1. Eventos de muerte (INMEDIATOS)
-        OnHealthChanged?.Invoke(currentHealth);
         OnPlayerDiedEvent?.Invoke();
         EventManager.PlayerDied();
 
-        // 2. Desactivar componentes del player (INMEDIATO)
         DisablePlayerComponents();
 
-        // 3. ⭐ OPCIÓN 1: Destrucción inmediata
-        if (destroyOnDeath && deathDelay <= 0f)
+        if (destroyOnDeath)
         {
-            DestroyPlayerImmediate();
+            if (deathDelay <= 0)
+                Destroy(gameObject);
+            else
+                Invoke(nameof(DestroyPlayer), deathDelay);
         }
-        // ⭐ OPCIÓN 2: Destrucción con delay muy corto
-        else if (destroyOnDeath && deathDelay > 0f)
-        {
-            Invoke(nameof(DestroyPlayer), deathDelay);
-        }
-        // ⭐ OPCIÓN 3: No destruir (para respawn)
-        else
-        {
-            Debug.Log("🔵 Player muerto pero no destruido (listo para respawn)");
-        }
-    }
-
-    private void DisablePlayerComponents()
-    {
-        // Desactivar combate
-        var autoAttack = GetComponent<PlayerAutoAttack>();
-        if (autoAttack != null)
-        {
-            autoAttack.enabled = false;
-            autoAttack.StopAllActions(); // ⭐ DETENER ACCIONES ACTUALES
-        }
-
-        // Desactivar movimiento (INMEDIATO)
-        var movement = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        if (movement != null)
-        {
-            movement.isStopped = true;
-            movement.enabled = false;
-        }
-
-        // Desactivar control
-        var controller = GetComponent<PlayerController>();
-        if (controller != null) controller.enabled = false;
-
-        // Desactivar habilidades
-        var abilitySystem = GetComponent<AbilitySystem>();
-        if (abilitySystem != null) abilitySystem.enabled = false;
-
-        // Desactivar colisiones (IMPORTANTE para que no siga recibiendo daño)
-        var collider = GetComponent<Collider>();
-        if (collider != null) collider.enabled = false;
-
-        // Detener regeneración
-        if (healthRegen != null) healthRegen.ForceStopRegeneration();
-
-        Debug.Log("🔴 Componentes del player desactivados INMEDIATAMENTE");
-    }
-
-    // ⭐ NUEVO: Destrucción inmediata
-    private void DestroyPlayerImmediate()
-    {
-        Debug.Log("💀 Destruyendo GameObject del player INMEDIATAMENTE");
-        Destroy(gameObject);
     }
 
     private void DestroyPlayer()
     {
-        Debug.Log("💀 Destruyendo GameObject del player");
         Destroy(gameObject);
     }
 
+    private void DisablePlayerComponents()
+    {
+        var autoAttack = GetComponent<PlayerAutoAttack>();
+        if (autoAttack != null)
+        {
+            autoAttack.enabled = false;
+            autoAttack.StopAllActions();
+        }
+
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        var controller = GetComponent<PlayerController>();
+        if (controller != null) controller.enabled = false;
+
+        var abilitySystem = GetComponent<AbilitySystem>();
+        if (abilitySystem != null) abilitySystem.enabled = false;
+
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        healthRegen?.ForceStopRegeneration();
+
+        Debug.Log("Player components disabled.");
+    }
+    #endregion
+
+    #region Respawn
     public void Respawn(Vector3 respawnPosition)
     {
         if (!isDead) return;
@@ -184,69 +163,34 @@ public class PlayerHealth : MonoBehaviour
         isDead = false;
         currentHealth = maxHealth;
 
-        // Cancelar cualquier destrucción pendiente
-        CancelInvoke(nameof(DestroyPlayer));
+        transform.position = respawnPosition;
 
         ReactivatePlayerComponents();
-        transform.position = respawnPosition;
 
         OnHealthChanged?.Invoke(currentHealth);
         EventManager.LifeChanged(currentHealth);
         OnPlayerRespawned?.Invoke();
 
-        Debug.Log($"🔵 Player revivido en {respawnPosition}");
+        Debug.Log($"Player respawned in {respawnPosition}");
     }
 
     private void ReactivatePlayerComponents()
     {
-        // Reactivar colisiones
-        var collider = GetComponent<Collider>();
-        if (collider != null) collider.enabled = true;
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = true;
 
-        var components = GetComponents<MonoBehaviour>();
-        foreach (var comp in components)
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
         {
-            if (comp != this && comp is not HealthRegenSystem)
+            agent.enabled = true;
+            agent.isStopped = false;
+        }
+
+        foreach (var comp in GetComponents<MonoBehaviour>())
+        {
+            if (comp != this)
                 comp.enabled = true;
         }
-
-        var movement = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        if (movement != null)
-        {
-            movement.enabled = true;
-            movement.isStopped = false;
-        }
-    }
-    #endregion
-
-    #region Utilidades
-    public float GetHealthPercentage() => (float)currentHealth / maxHealth;
-    public bool IsAlive() => !isDead && currentHealth > 0;
-    public bool IsDead() => isDead;
-    public bool IsFullHealth() => currentHealth >= maxHealth;
-    public bool IsLowHealth() => GetHealthPercentage() <= 0.3f;
-
-    public void SetInvulnerable(bool invulnerable, float duration = 0f)
-    {
-        isInvulnerable = invulnerable;
-        Debug.Log($"{(invulnerable ? "🛡️" : "❌")} Invulnerabilidad {(invulnerable ? "activada" : "desactivada")}");
-
-        if (duration > 0f)
-        {
-            Invoke(nameof(RemoveInvulnerability), duration);
-        }
-    }
-
-    private void RemoveInvulnerability()
-    {
-        isInvulnerable = false;
-    }
-
-    // ⭐ NUEVO: Forzar muerte inmediata (para testing)
-    public void ForceDie()
-    {
-        currentHealth = 0;
-        Die();
     }
     #endregion
 }

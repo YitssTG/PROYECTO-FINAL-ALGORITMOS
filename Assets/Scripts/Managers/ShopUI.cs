@@ -10,7 +10,6 @@ public class ShopUI : MonoBehaviour
 
     public Button buyButton;
     public Button undoButton;
-    //public Button closeButton;
 
     public ItemGraphUI attackGraphUI;
     public ItemGraphUI defenseGraphUI;
@@ -26,7 +25,6 @@ public class ShopUI : MonoBehaviour
     {
         buyButton.onClick.AddListener(OnBuyClicked);
         undoButton.onClick.AddListener(OnUndoClicked);
-        //closeButton.onClick.AddListener(CloseShop);
 
         ResolveManagers();
         AssignGraphReferences();

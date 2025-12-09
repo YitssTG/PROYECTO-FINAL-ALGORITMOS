@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Defensa
   icon: {fileID: 21300000, guid: 57271c42cf5074f40951be16d1db7358, type: 3}
-  cost: 120
+  cost: 170
   description: 
   bonusDamage: 0
-  bonusArmor: 12
+  bonusArmor: 16
   bonusSpeed: 0
   requiredItems:
   - {fileID: 11400000, guid: 401e390f95cdcf646a3ed93b13573370, type: 2}

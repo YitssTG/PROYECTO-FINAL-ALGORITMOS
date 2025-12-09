@@ -71,34 +71,34 @@ public class GameManager : MonoBehaviour
     private void VerificarReferencias()
     {
         if (abilitySystem == null)
-            Debug.LogWarning("⚠️ AbilitySystem no está asignado en GameManager.");
+            Debug.LogWarning("AbilitySystem no está asignado en GameManager.");
 
         if (playerStats == null)
-            Debug.LogWarning("⚠️ PlayerStats no está asignado en GameManager.");
+            Debug.LogWarning("PlayerStats no está asignado en GameManager.");
 
         if (spawners == null || spawners.Length == 0)
-            Debug.LogWarning("⚠️ No hay spawners asignados en GameManager.");
+            Debug.LogWarning("No hay spawners asignados en GameManager.");
 
         if (goldManager == null)
-            Debug.LogWarning("⚠️ GoldManager no está asignado en GameManager.");
+            Debug.LogWarning("GoldManager no está asignado en GameManager.");
 
         if (waveManager == null)
-            Debug.LogWarning("⚠️ WaveManager no está asignado en GameManager.");
+            Debug.LogWarning("WaveManager no está asignado en GameManager.");
 
         if (abilityManager == null)
-            Debug.LogWarning("⚠️ AbilityManager no asignado en GameManager.");
+            Debug.LogWarning("AbilityManager no asignado en GameManager.");
 
         if (shopManager == null)
-            Debug.LogWarning("⚠️ ShopManager no asignado en GameManager.");
+            Debug.LogWarning("ShopManager no asignado en GameManager.");
 
         if (itemManager == null)
-            Debug.LogWarning("⚠️ ItemManager no asignado en GameManager.");
+            Debug.LogWarning("ItemManager no asignado en GameManager.");
 
         if (inventoryManager == null)
-            Debug.LogWarning("⚠️ InventoryManager no asignado en GameManager.");
+            Debug.LogWarning("InventoryManager no asignado en GameManager.");
 
         if (towerSOList == null || towerSOList.Length == 0)
-            Debug.LogWarning("⚠️ No hay torretas configuradas en GameManager.");
+            Debug.LogWarning("No hay torretas configuradas en GameManager.");
     }
     #endregion
 
@@ -106,37 +106,36 @@ public class GameManager : MonoBehaviour
     private void OnEnemyDead()
     {
         enemigosDerrotados++;
-        playerStats?.AddExperience(25);  // Se asegura de que playerStats no sea nulo
+        playerStats?.AddExperience(25);  
         Debug.Log($"GameManager: Enemigo derrotado. Total: {enemigosDerrotados}");
     }
 
     private void OnCoinsAdded(int amount)
     {
         monedasTotales += amount;
-        goldManager?.AddGold(amount);  // Si goldManager no es nulo, agrega el oro
+        goldManager?.AddGold(amount);  
         Debug.Log($"GameManager: +{amount} monedas. Total: {monedasTotales}");
     }
 
     private void OnWaveStarted(int waveNumber)
     {
-        Debug.Log($"🎯 GameManager: Oleada {waveNumber} iniciada");
+        Debug.Log($"GameManager: Oleada {waveNumber} iniciada");
     }
 
     private void OnWaveCompleted(int waveNumber)
     {
-        Debug.Log($"🎉 GameManager: Oleada {waveNumber} completada");
+        Debug.Log($"GameManager: Oleada {waveNumber} completada");
         if (goldManager != null)
         {
             int recompensa = waveNumber * 50;
             goldManager.AddGold(recompensa);
-            Debug.Log($"💰 Recompensa de oleada: +{recompensa} oro");
+            Debug.Log($"Recompensa de oleada: +{recompensa} oro");
         }
     }
 
     private void OnPlayerDied()
     {
-        Debug.Log("💀 GameManager: Player murió - Game Over");
-        // Aquí puedes agregar lógica para el fin del juego, pausar el juego, etc.
+        Debug.Log("GameManager: Player murió - Game Over");
     }
     #endregion
 
@@ -285,10 +284,10 @@ public class GameManager : MonoBehaviour
 
         if (goldManager != null)
         {
-            Debug.Log($"💰 Oro inicial: {goldManager.currentGold}");
+            Debug.Log($"Oro inicial: {goldManager.currentGold}");
         }
 
-        Debug.Log("✅ Sistema de tienda completamente inicializado");
+        Debug.Log("Sistema de tienda completamente inicializado");
     }
 
     private bool HasInitializeMethod(object obj)

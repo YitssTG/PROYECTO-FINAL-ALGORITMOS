@@ -16,7 +16,7 @@ MonoBehaviour:
   projectileSpeed: 20
   explosionRadius: 3
   damageBase: 50
-  damagePerLevel: 25
+  damagePerLevel: 30
   duration: 3
   dashDistance: 6
   meteorDelay: 1

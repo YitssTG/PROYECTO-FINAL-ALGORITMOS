@@ -19,6 +19,9 @@ public class PlayerAutoAttack : MonoBehaviour
     private float nextAttackTime = 0f;
     public int maxQueuePoints = 3;
 
+    public Vector3 CurrentVelocity { get; private set; } = Vector3.zero;
+
+
     private Queue<Vector3> moveQueue = new Queue<Vector3>();
 
     void Awake()

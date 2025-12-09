@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Ataque
   icon: {fileID: 21300000, guid: 0fadee17a57db8d4281f821171e3547e, type: 3}
-  cost: 150
+  cost: 100
   description: 
-  bonusDamage: 8
+  bonusDamage: 5
   bonusArmor: 0
   bonusSpeed: 0
   requiredItems:
