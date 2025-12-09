@@ -22,7 +22,6 @@ public class Ability : ScriptableObject
     public int maxLevel = 5;
     public bool locked = true;
 
-    // Helpers de datos (NO lógica de juego)
     public int GetDamageAtLevel(int level)
     {
         return Mathf.RoundToInt(damageBase + damagePerLevel * level);

@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-public abstract class EnemyBase : MonoBehaviour, IDamageable
+public abstract class EnemyBase : MonoBehaviour, IDamageable, IAttacker
 {
     [Header("UI")]
-    public EnemyHealthBarUI healthBarInstance; // Referencia directa al slider que ya está en el prefab
+    public EnemyHealthBarUI healthBarInstance;
 
     [Header("Stats")]
     [HideInInspector] public string enemyName;
@@ -17,7 +17,18 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     public event EnemyDeathHandler OnEnemyDeath;
 
     public int CurrentHealth => health;
-    public int CurrentDamage => damage;
+    public int GetCurrentHealth() => health;
+
+    public int Damage => damage;         
+    public float AttackRate => 1f;       
+    public void Attack(IDamageable target)
+    {
+        if (target == null || IsDead()) return;
+        target.TakeDamage(damage);
+    }
+
+    public int CurrentDamage => damage; 
+
     public string EnemyName => enemyName;
 
     protected virtual void Awake()
@@ -73,7 +84,6 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     }
 
     public bool IsDead() => health <= 0;
-    public int GetCurrentHealth() => health;    
 
     public virtual void Die()
     {

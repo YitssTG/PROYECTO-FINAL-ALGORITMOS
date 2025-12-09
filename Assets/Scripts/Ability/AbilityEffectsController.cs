@@ -24,7 +24,7 @@ public class AbilityEffectsController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ AbilitySystem no asignado en EffectsController");
+            Debug.LogError("AbilitySystem no asignado en EffectsController");
         }
 
         if (cam == null) cam = Camera.main;

@@ -12,7 +12,7 @@ public class EnemyManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("✅ EnemyManager Instance creada");
+            Debug.Log("EnemyManager Instance creada");
         }
         else
         {

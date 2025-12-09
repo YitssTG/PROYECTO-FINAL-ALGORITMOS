@@ -4,7 +4,6 @@ public class EnemyMiniTank : EnemyBase
 {
     [Header("Comportamiento Tank")]
     [HideInInspector] public float slowAuraRadius = 5f;
-    //[HideInInspector] public int armor = 10;
 
     public override void Attack()
     {
@@ -29,8 +28,4 @@ public class EnemyMiniTank : EnemyBase
         }
     }
 
-    //public int CalculateEffectiveDamage(int incomingDamage)
-    //{
-    //    return Mathf.Max(1, incomingDamage - armor);
-    //}
 }

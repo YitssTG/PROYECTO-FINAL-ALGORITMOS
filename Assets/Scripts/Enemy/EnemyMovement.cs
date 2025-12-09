@@ -2,21 +2,23 @@
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class EnemyMovement : MonoBehaviour
+public class EnemyMovement : MonoBehaviour, IMovable
 {
     [HideInInspector] public Transform target;
-
     [HideInInspector] public float detectionRadius = 20f;
     [HideInInspector] public float attackRadius = 15f;
     [HideInInspector] public float speed = 3.5f;
 
     private NavMeshAgent agent;
+    private Vector3 walkDestination;
+    private bool hasWalkDestination = false;
 
     private enum State { Idle, Walking, Chasing, Attacking }
     private State currentState = State.Idle;
 
-    private Vector3 walkDestination;
-    private bool hasWalkDestination = false;
+    // === IMovable Properties ===
+    public Vector3 CurrentPosition => transform.position;
+    public Vector3 CurrentVelocity => agent != null ? agent.velocity : Vector3.zero;
 
     void Awake()
     {
@@ -27,28 +29,17 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
-        if (target == null && hasWalkDestination)
+        if (target == null && hasWalkDestination) WalkToDestination();
+        else if (target == null) agent.isStopped = true;
+
+        if (target != null)
         {
-            WalkToDestination();
-            return;
+            float dist = Vector3.Distance(transform.position, target.position);
+            if (dist <= attackRadius) currentState = State.Attacking;
+            else if (dist <= detectionRadius) currentState = State.Chasing;
+            else if (hasWalkDestination) currentState = State.Walking;
+            else currentState = State.Idle;
         }
-
-        if (target == null)
-        {
-            agent.isStopped = true;
-            return;
-        }
-
-        float dist = Vector3.Distance(transform.position, target.position);
-
-        if (dist <= attackRadius)
-            currentState = State.Attacking;
-        else if (dist <= detectionRadius)
-            currentState = State.Chasing;
-        else if (hasWalkDestination)
-            currentState = State.Walking;
-        else
-            currentState = State.Idle;
 
         switch (currentState)
         {
@@ -56,15 +47,12 @@ public class EnemyMovement : MonoBehaviour
                 agent.isStopped = false;
                 agent.SetDestination(target.position);
                 break;
-
             case State.Attacking:
                 agent.isStopped = true;
                 break;
-
             case State.Walking:
                 WalkToDestination();
                 break;
-
             default:
                 agent.isStopped = true;
                 break;
@@ -75,7 +63,6 @@ public class EnemyMovement : MonoBehaviour
     {
         walkDestination = destination;
         hasWalkDestination = true;
-
         agent.isStopped = false;
         agent.SetDestination(walkDestination);
     }
@@ -87,8 +74,25 @@ public class EnemyMovement : MonoBehaviour
         agent.SetDestination(walkDestination);
     }
 
-    public void Die()
+    public void Die() => Destroy(gameObject);
+
+    public void MoveTo(Vector3 position)
     {
-        Destroy(gameObject);
+        SetWalkDestination(position);
+    }
+
+    public void StopMovement()
+    {
+        hasWalkDestination = false;
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+    }
+
+    public bool IsMoving()
+    {
+        return agent != null && agent.velocity.sqrMagnitude > 0.01f;
     }
 }

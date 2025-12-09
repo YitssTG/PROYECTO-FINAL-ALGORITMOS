@@ -15,7 +15,7 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Referencias")]
     public Transform player;
-    public Transform endPoint; // Cada spawner su propio endPoint
+    public Transform endPoint; 
 
     [Header("Configuración de spawn")]
     public float radioSpawn = 10f;
@@ -25,7 +25,6 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        // No hacemos nada, spawn controlado por WaveManager
     }
 
     public void SetActive(bool active)
@@ -37,23 +36,18 @@ public class EnemySpawner : MonoBehaviour
     {
         if (!puedeSpawnear) yield break;
 
-        // La cantidad de grupos por oleada = número de oleada (1,2,3)
         int grupos = waveNumber;
         for (int g = 0; g < grupos; g++)
         {
-            // Spawnear melee
             for (int i = 0; i < meleeBase; i++)
                 yield return SpawnEnemy(meleeEnemySO, waveNumber);
 
-            // Spawnear ranged
             for (int i = 0; i < rangedBase; i++)
                 yield return SpawnEnemy(rangedEnemySO, waveNumber);
 
-            // Spawnear miniTank
             for (int i = 0; i < miniTankBase; i++)
                 yield return SpawnEnemy(miniTankEnemySO, waveNumber);
 
-            // Espera entre grupos
             yield return new WaitForSeconds(1f);
         }
     }
@@ -69,7 +63,7 @@ public class EnemySpawner : MonoBehaviour
         EnemyBase enemigoBase = enemigoGO.GetComponent<EnemyBase>();
         if (enemigoBase != null)
         {
-            enemigoBase.Initialize(data, waveNumber); // Stats desde SO
+            enemigoBase.Initialize(data, waveNumber); 
         }
 
         EnemyMovement mov = enemigoGO.GetComponent<EnemyMovement>();

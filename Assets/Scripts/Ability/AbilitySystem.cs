@@ -26,7 +26,6 @@ public class AbilitySystem : MonoBehaviour
     public Dictionary<AbilityType, Ability> abilities = new();
     public Dictionary<AbilityType, AbilityState> state = new();
 
-    // Evento centralizado para reemplazar los OnCast individuales
     public System.Action<AbilityType> OnAbilityCast;
 
     private PlayerStats playerStats;
@@ -50,13 +49,11 @@ public class AbilitySystem : MonoBehaviour
             return;
         }
 
-        // Cargar habilidades
         abilities[AbilityType.PrimaryAb] = abilityDatabase.GetByType(AbilityType.PrimaryAb);
         abilities[AbilityType.SecondaryAb] = abilityDatabase.GetByType(AbilityType.SecondaryAb);
         abilities[AbilityType.ThirdAb] = abilityDatabase.GetByType(AbilityType.ThirdAb);
         abilities[AbilityType.Ultimate] = abilityDatabase.GetByType(AbilityType.Ultimate);
 
-        // Cargar estados
         foreach (var kvp in abilities)
         {
             AbilityType type = kvp.Key;
@@ -70,10 +67,9 @@ public class AbilitySystem : MonoBehaviour
             state[type] = st;
         }
 
-        Debug.Log("✅ AbilitySystem inicializado");
+        Debug.Log("AbilitySystem inicializado");
     }
 
-    // Métodos de utilidad para otros sistemas
     public bool CanCast(AbilityType type)
     {
         if (!abilities.ContainsKey(type) || !state.ContainsKey(type))

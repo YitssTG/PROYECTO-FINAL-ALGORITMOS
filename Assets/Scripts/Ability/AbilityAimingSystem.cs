@@ -42,7 +42,6 @@ public class AbilityAimingSystem : MonoBehaviour
         if (cam == null) cam = Camera.main;
     }
 
-    // Método público para que AbilityInputHandler inicie el apuntado
     public void StartAiming(AbilityType type)
     {
         if (isAiming) EndAiming();

@@ -24,7 +24,6 @@ public class AbilityUI : MonoBehaviour
         Debug.Log($"🔧 AbilityUI {abilityKey} iniciando...");
         float timer = 0f;
 
-        // Esperar a que los managers estén listos
         while ((AbilityManager.Instance == null || !AbilityManager.Instance.IsReady()) && timer < waitTimeout)
         {
             timer += Time.deltaTime;
@@ -33,20 +32,20 @@ public class AbilityUI : MonoBehaviour
 
         if (AbilityManager.Instance == null)
         {
-            Debug.LogError("❌ AbilityManager no disponible en AbilityUI");
+            Debug.LogError("AbilityManager no disponible en AbilityUI");
             yield break;
         }
 
         if (!AbilityManager.Instance.IsReady())
         {
-            Debug.LogError("❌ AbilityManager no está listo");
+            Debug.LogError("AbilityManager no está listo");
             yield break;
         }
 
         currentAbility = AbilityManager.Instance.GetAbility(abilityKey);
         if (currentAbility == null)
         {
-            Debug.LogError($"❌ No se pudo obtener la habilidad {abilityKey} desde AbilityManager");
+            Debug.LogError($"No se pudo obtener la habilidad {abilityKey} desde AbilityManager");
             yield break;
         }
 
@@ -60,14 +59,13 @@ public class AbilityUI : MonoBehaviour
         }
 
         UpdateUI();
-        Debug.Log($"✅ AbilityUI {abilityKey} inicializado correctamente");
+        Debug.Log($"AbilityUI {abilityKey} inicializado correctamente");
     }
 
     void Update()
     {
         if (currentAbility == null) return;
 
-        // Actualizar UI constantemente para mostrar cambios en tiempo real
         UpdateUI();
     }
 
@@ -75,12 +73,10 @@ public class AbilityUI : MonoBehaviour
     {
         if (currentAbility == null) return;
 
-        // Actualizar nivel
         int abilityLevel = AbilityManager.Instance.GetAbilityLevel(abilityKey);
         if (levelText != null)
             levelText.text = "Lv " + abilityLevel.ToString();
 
-        // Actualizar botón de upgrade
         if (upgradeButton != null)
         {
             bool canUpgrade = AbilityManager.Instance.CanUpgradeAbility(abilityKey);
@@ -88,7 +84,7 @@ public class AbilityUI : MonoBehaviour
 
             if (canUpgrade)
             {
-                Debug.Log($"🔧 Botón {abilityKey} MOSTRADO - Se puede mejorar");
+                Debug.Log($"Botón {abilityKey} MOSTRADO - Se puede mejorar");
             }
         }
 
@@ -124,8 +120,7 @@ public class AbilityUI : MonoBehaviour
 
     private void OnUpgradeClicked()
     {
-        Debug.Log($"🔧 Botón de upgrade clickeado para {abilityKey}");
+        Debug.Log($"Botón de upgrade clickeado para {abilityKey}");
         AbilityManager.Instance.UpgradeAbility(abilityKey);
-        // La UI se actualizará automáticamente en el próximo Update
     }
 }

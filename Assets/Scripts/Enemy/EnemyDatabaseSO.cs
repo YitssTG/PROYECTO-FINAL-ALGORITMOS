@@ -6,7 +6,6 @@ public class EnemyDatabaseSO : ScriptableObject
 {
     public List<EnemyDataSO> allEnemies = new List<EnemyDataSO>();
 
-    // ⭐ MÉTODOS PARA BUSCAR ENEMIGOS
     public EnemyDataSO GetEnemyByName(string enemyName)
     {
         return allEnemies.Find(enemy => enemy.enemyName == enemyName);
@@ -23,7 +22,6 @@ public class EnemyDatabaseSO : ScriptableObject
         return allEnemies[Random.Range(0, allEnemies.Count)];
     }
 
-    // ⭐ SOBRECARGA - Obtener enemigo por índice o nombre
     public EnemyDataSO GetEnemy(int index)
     {
         return (index >= 0 && index < allEnemies.Count) ? allEnemies[index] : null;

@@ -18,22 +18,20 @@ public class EnemyDeathHandler : MonoBehaviour
 
     private void HandleEnemyDeath(EnemyBase deadEnemy)
     {
-        // Notificar sistemas globales
         EventManager.EnemyDefeated();
-        EventManager.CoinsCollected(deadEnemy.rewardGold); // Actualizado
+        EventManager.CoinsCollected(deadEnemy.rewardGold);
 
         if (GameManager.Instance != null && GameManager.Instance.playerStats != null)
         {
-            GameManager.Instance.playerStats.AddExperience(deadEnemy.rewardXP); // Actualizado
+            GameManager.Instance.playerStats.AddExperience(deadEnemy.rewardXP); 
         }
 
-        // Remover del manager
         EnemyMovement mov = GetComponent<EnemyMovement>();
         if (mov != null && EnemyManager.Instance != null)
         {
             EnemyManager.Instance.Desregistrar(mov);
         }
 
-        Debug.Log($"💰 {deadEnemy.enemyName} muerto - +{deadEnemy.rewardGold} oro, +{deadEnemy.rewardXP} XP"); // Actualizado
+        Debug.Log($"💰 {deadEnemy.enemyName} muerto - +{deadEnemy.rewardGold} oro, +{deadEnemy.rewardXP} XP"); 
     }
 }

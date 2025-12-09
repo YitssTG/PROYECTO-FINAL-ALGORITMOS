@@ -56018,6 +56018,7 @@ GameObject:
   - component: {fileID: 2019222678}
   - component: {fileID: 2019222679}
   - component: {fileID: 2019222680}
+  - component: {fileID: 2019222682}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -56130,7 +56131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model3D: {fileID: 2019222667}
-  input: {fileID: 1914247872}
+  input: {fileID: 0}
   indicatorPrefab: {fileID: 7815365062621477655, guid: 190e3645f3c45084698cdaee9147b6d5, type: 3}
   freeMode: 0
   rotationSpeed: 720
@@ -56212,9 +56213,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackRange: 2
   attackCooldown: 1
-  stopDistance: 0.1
-  agent: {fileID: 2019222669}
-  cam: {fileID: 330585545}
+  stopDistance: 0.2
+  agent: {fileID: 0}
+  cam: {fileID: 0}
   maxQueuePoints: 3
 --- !u!54 &2019222674
 Rigidbody:
@@ -56361,6 +56362,21 @@ MonoBehaviour:
   OnPlayerRespawned:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2019222682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019222662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91fc0f28f8b009441aca9305f035eeff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stopDistance: 0.2
+  maxQueuePoints: 3
+  agent: {fileID: 0}
 --- !u!4 &2021493141 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 488878, guid: 0c8b53b4a2c2a624d8f344f282d709aa, type: 3}

@@ -10,7 +10,6 @@ public class AbilityInputHandler : MonoBehaviour
     private bool isCtrlPressed = false;
     private bool isShiftPressed = false;
 
-    // Input para modificadores
     public void OnCtrlPressed(InputAction.CallbackContext ctx)
     {
         if (ctx.performed) isCtrlPressed = true;
@@ -23,7 +22,6 @@ public class AbilityInputHandler : MonoBehaviour
         if (ctx.canceled) isShiftPressed = false;
     }
 
-    // CASTEO RÁPIDO (sin modificadores)
     public void OnAbilityQ(InputAction.CallbackContext ctx)
     {
         if (ctx.performed && !isCtrlPressed && !isShiftPressed && !IsAiming())
@@ -31,7 +29,6 @@ public class AbilityInputHandler : MonoBehaviour
             abilitySystem?.TryCast(AbilityType.PrimaryAb);
         }
     }
-
     public void OnAbilityW(InputAction.CallbackContext ctx)
     {
         if (ctx.performed && !isCtrlPressed && !isShiftPressed && !IsAiming())
@@ -56,7 +53,6 @@ public class AbilityInputHandler : MonoBehaviour
         }
     }
 
-    // CASTEO APUNTADO (Shift + Tecla)
     public void OnAimAbilityQ(InputAction.CallbackContext ctx)
     {
         if (ctx.performed && isShiftPressed && !isCtrlPressed && !IsAiming())
@@ -81,7 +77,6 @@ public class AbilityInputHandler : MonoBehaviour
         }
     }
 
-    // MEJORA (Ctrl + Tecla)
     public void OnUpgradeQ(InputAction.CallbackContext ctx)
     {
         if (ctx.performed && isCtrlPressed && !isShiftPressed)
