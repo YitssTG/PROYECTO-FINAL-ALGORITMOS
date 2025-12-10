@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public enum AbilityType
 {
     None,
-    PrimaryAb,    // Q
-    SecondaryAb,  // W
-    ThirdAb,      // E
-    Ultimate      // R
+    PrimaryAb,    
+    SecondaryAb,  
+    ThirdAb,      
+    Ultimate     
 }
 
 [System.Serializable]
@@ -29,13 +30,40 @@ public class AbilitySystem : MonoBehaviour
     public System.Action<AbilityType> OnAbilityCast;
 
     private PlayerStats playerStats;
+    private bool isInitialized = false;
 
     void Start()
     {
-        if (abilities.Count == 0)
-        {
-            Initialize();
-        }
+        TryInitialize();
+    }
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        TryInitialize();
+    }
+
+    private void TryInitialize()
+    {
+        if (GameManager.Instance == null)
+            return;
+
+        if (GameManager.Instance.playerStats == null)
+            return;
+
+        if (isInitialized)
+            return;
+
+        Initialize();
     }
 
     public void Initialize()
@@ -44,17 +72,19 @@ public class AbilitySystem : MonoBehaviour
 
         if (playerStats == null)
         {
-            Debug.LogError("[AbilitySystem] PlayerStats no asignado.");
-            enabled = false;
+            Debug.LogWarning("[AbilitySystem] PlayerStats aún no listo, esperando escena...");
             return;
         }
+
+        abilities.Clear();
+        state.Clear();
 
         abilities[AbilityType.PrimaryAb] = abilityDatabase.GetByType(AbilityType.PrimaryAb);
         abilities[AbilityType.SecondaryAb] = abilityDatabase.GetByType(AbilityType.SecondaryAb);
         abilities[AbilityType.ThirdAb] = abilityDatabase.GetByType(AbilityType.ThirdAb);
         abilities[AbilityType.Ultimate] = abilityDatabase.GetByType(AbilityType.Ultimate);
 
-        foreach (var kvp in abilities)
+        foreach (KeyValuePair<AbilityType, Ability> kvp in abilities)
         {
             AbilityType type = kvp.Key;
             Ability ab = kvp.Value;
@@ -67,7 +97,8 @@ public class AbilitySystem : MonoBehaviour
             state[type] = st;
         }
 
-        Debug.Log("AbilitySystem inicializado");
+        isInitialized = true;
+        Debug.Log("AbilitySystem inicializado correctamente");
     }
 
     public bool CanCast(AbilityType type)
@@ -122,7 +153,6 @@ public class AbilitySystem : MonoBehaviour
 
         if (availableSkillPoints <= 0) return false;
         if (st.level >= ab.maxLevel) return false;
-
         if (type == AbilityType.Ultimate && playerLevel < 5) return false;
 
         return true;

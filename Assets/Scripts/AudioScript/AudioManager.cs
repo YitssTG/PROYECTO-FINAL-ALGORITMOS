@@ -16,12 +16,34 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {
-        OnCollisionMusic?.Invoke(audioSettings.AudioMixerGroup, audioData.AudioClip);
+        // Música inicial al cargar la escena
+        ChangeMusic(audioSettings.AudioMixerGroup, audioData.AudioClip);
     }
+
+    // ============================
+    // MÉTODOS PARA OTROS SCRIPTS
+    // ============================
+
+    public static void ChangeMusic(AudioMixerGroup group, AudioClip clip)
+    {
+        OnCollisionMusic?.Invoke(group, clip);
+    }
+
+    public static void StopMusic(AudioMixerGroup group)
+    {
+        OnCollisionStopMusic?.Invoke(group);
+    }
+
+    public static void PlayExitMusic(AudioMixerGroup group, AudioClip clip)
+    {
+        OnExitCollision?.Invoke(group, clip);
+    }
+
     public static void TriggerFootstep(AudioClip clip)
     {
         OnFootstep?.Invoke(clip);
     }
+
     public static void TriggerCoinSound(AudioClip clip)
     {
         OnCoinCollectedSound?.Invoke(clip);

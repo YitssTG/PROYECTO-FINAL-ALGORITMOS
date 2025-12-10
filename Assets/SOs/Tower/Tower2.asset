@@ -16,4 +16,4 @@ MonoBehaviour:
   cost: 400
   damage: 5
   range: 18
-  towerPrefab: {fileID: 7263089857831832697, guid: 207aa87d80b99a74682769a6a7277ee0, type: 3}
+  towerPrefab: {fileID: 7263089857831832697, guid: 40cfd10e8393d6e4183b0c4cd101be70, type: 3}

@@ -15,38 +15,31 @@ public class AbilityUI : MonoBehaviour
     public Image cooldownFill;
     public TextMeshProUGUI cooldownText;
 
-    public float waitTimeout = 5f;
+    public float waitTimeout = 5f; // ya no se usa, pero lo dejamos por compatibilidad
 
     private Ability currentAbility;
 
     IEnumerator Start()
     {
         Debug.Log($"🔧 AbilityUI {abilityKey} iniciando...");
-        float timer = 0f;
 
-        while ((AbilityManager.Instance == null || !AbilityManager.Instance.IsReady()) && timer < waitTimeout)
+        // Esperar hasta que AbilityManager esté listo (sin morir por timeout)
+        while (AbilityManager.Instance == null || !AbilityManager.Instance.IsReady())
         {
-            timer += Time.deltaTime;
             yield return null;
         }
 
-        if (AbilityManager.Instance == null)
-        {
-            Debug.LogError("AbilityManager no disponible en AbilityUI");
-            yield break;
-        }
+        Setup();
+    }
 
-        if (!AbilityManager.Instance.IsReady())
-        {
-            Debug.LogError("AbilityManager no está listo");
-            yield break;
-        }
-
+    private void Setup()
+    {
         currentAbility = AbilityManager.Instance.GetAbility(abilityKey);
+
         if (currentAbility == null)
         {
-            Debug.LogError($"No se pudo obtener la habilidad {abilityKey} desde AbilityManager");
-            yield break;
+            Debug.LogError($"No se pudo obtener la habilidad {abilityKey}");
+            return;
         }
 
         if (cooldownMask != null)
@@ -59,7 +52,7 @@ public class AbilityUI : MonoBehaviour
         }
 
         UpdateUI();
-        Debug.Log($"AbilityUI {abilityKey} inicializado correctamente");
+        Debug.Log($"AbilityUI {abilityKey} listo ✅");
     }
 
     void Update()
@@ -71,9 +64,10 @@ public class AbilityUI : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (currentAbility == null) return;
+        if (currentAbility == null || AbilityManager.Instance == null) return;
 
         int abilityLevel = AbilityManager.Instance.GetAbilityLevel(abilityKey);
+
         if (levelText != null)
             levelText.text = "Lv " + abilityLevel.ToString();
 
@@ -81,11 +75,6 @@ public class AbilityUI : MonoBehaviour
         {
             bool canUpgrade = AbilityManager.Instance.CanUpgradeAbility(abilityKey);
             upgradeButton.gameObject.SetActive(canUpgrade);
-
-            if (canUpgrade)
-            {
-                Debug.Log($"Botón {abilityKey} MOSTRADO - Se puede mejorar");
-            }
         }
 
         UpdateCooldownVisual();
@@ -93,7 +82,7 @@ public class AbilityUI : MonoBehaviour
 
     private void UpdateCooldownVisual()
     {
-        if (currentAbility == null || cooldownMask == null) return;
+        if (currentAbility == null || cooldownMask == null || AbilityManager.Instance == null) return;
 
         float remaining = AbilityManager.Instance.GetCooldownRemaining(abilityKey);
         bool onCooldown = remaining > 0.05f;
@@ -120,6 +109,8 @@ public class AbilityUI : MonoBehaviour
 
     private void OnUpgradeClicked()
     {
+        if (AbilityManager.Instance == null) return;
+
         Debug.Log($"Botón de upgrade clickeado para {abilityKey}");
         AbilityManager.Instance.UpgradeAbility(abilityKey);
     }

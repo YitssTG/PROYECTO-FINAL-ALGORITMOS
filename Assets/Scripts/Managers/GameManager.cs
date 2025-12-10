@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +28,12 @@ public class GameManager : MonoBehaviour
     public ItemManager itemManager;
     public InventoryManager inventoryManager;
 
+    [Header("Town Life")]
+    public float maxTownHealth = 100f;
+    public float currentTownHealth;
+
+    public System.Action<float> OnTownHealthChanged;
+
     void Awake()
     {
         if (Instance == null)
@@ -45,7 +52,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        itemManager.Initialize(); 
+        itemManager.Initialize();
+        currentTownHealth = maxTownHealth;
         Debug.Log("GAME MANAGER INICIALIZADO CORRECTAMENTE");
     }
 
@@ -135,7 +143,13 @@ public class GameManager : MonoBehaviour
 
     private void OnPlayerDied()
     {
-        Debug.Log("GameManager: Player murió - Game Over");
+        Debug.Log("GameManager: Player murió - Cargando Menú...");
+
+        // Reinicia stats si quieres
+        ResetGameStats();
+
+        // Cargar escena "Menu"
+        SceneManager.LoadScene("Menu");
     }
     #endregion
 
@@ -190,6 +204,19 @@ public class GameManager : MonoBehaviour
     {
         if (index < 0 || index >= towerSOList.Length) return null;
         return towerSOList[index];
+    }
+    public void DamageVillage(float amount)
+    {
+        currentTownHealth -= amount;
+        currentTownHealth = Mathf.Clamp(currentTownHealth, 0f, maxTownHealth);
+
+        OnTownHealthChanged?.Invoke(currentTownHealth);
+
+        if (currentTownHealth <= 0)
+        {
+            Debug.Log("El pueblo fue destruido");
+            OnPlayerDied();
+        }
     }
 
     public bool CanBuild()
